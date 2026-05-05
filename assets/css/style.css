@@ -5,10 +5,10 @@
 
 /* --- CSS Variables (brand tokens) -------------------------- */
 :root {
-  --blue:   #14213D;
+  --blue: #14213D;
   --yellow: #FFB512;
-  --white:  #FFFFFF;
-  --gray:   #E5E5E5;
+  --white: #FFFFFF;
+  --gray: #E5E5E5;
 }
 
 /* --- Global ------------------------------------------------- */
@@ -16,6 +16,10 @@ body {
   background-color: var(--gray);
   font-family: sans-serif;
   color: var(--blue);
+}
+
+#tablaHistorial td {
+  padding: 5px;
 }
 
 /* --- Page Header Card --------------------------------------- */
@@ -181,9 +185,18 @@ body {
 }
 
 /* Deterministic avatar colors using nth-child */
-.avatar-blue   { background-color: #7a94c1; }
-.avatar-yellow { background-color: var(--yellow); color: var(--blue); }
-.avatar-gray   { background-color: #a3b0c8; }
+.avatar-blue {
+  background-color: #7a94c1;
+}
+
+.avatar-yellow {
+  background-color: var(--yellow);
+  color: var(--blue);
+}
+
+.avatar-gray {
+  background-color: #a3b0c8;
+}
 
 /* Action icons */
 .action-btn {
@@ -193,16 +206,19 @@ body {
   color: #8899bb;
   padding: 0.3rem 0.55rem;
   border-radius: 6px;
-  font-size: 1.25rem;       /* larger icons */
+  font-size: 1.25rem;
+  /* larger icons */
   line-height: 1;
-  text-decoration: none;    /* removes underscore on <a> */
+  text-decoration: none;
+  /* removes underscore on <a> */
   display: inline-flex;
   align-items: center;
   transition: color 0.15s, background-color 0.15s;
 }
 
-.action-btn + .action-btn {
-  margin-left: 0.4rem;      /* space between icons */
+.action-btn+.action-btn {
+  margin-left: 0.4rem;
+  /* space between icons */
 }
 
 .action-btn:hover {

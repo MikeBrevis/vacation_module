@@ -33,16 +33,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('empAniosCot').textContent = datos.empleado.cumple_10_anos_base ? `${anosCot}+` : anosCot;
     document.getElementById('empMesesCot').textContent = mesesCot;
     
+    // Años que ya tienen carga histórica registrada
+    const anosRegistrados = new Set(
+      datos.solicitudes
+        .filter(s => s.fecha_inicio.includes('-01-01') && s.fecha_fin.includes('-12-31'))
+        .map(s => s.fecha_inicio.split('-')[0])
+    );
+
     // Poblar el selector de años históricos (desde su ingreso hasta el año actual)
     const selectAnio = document.getElementById('histAnio');
     selectAnio.innerHTML = '<option value="">Seleccione un año...</option>';
     for (let y = hoy.getFullYear(); y > ingreso.getFullYear(); y--) {
       const option = document.createElement('option');
       option.value = y;
-      option.textContent = y;
+      if (anosRegistrados.has(String(y))) {
+        option.textContent = `${y} (registrado)`;
+        option.disabled = true;
+      } else {
+        option.textContent = y;
+      }
       selectAnio.appendChild(option);
     }
-    
+
     renderPanelSaldos(datos.saldo);
     renderHistorial(datos.solicitudes);
 
@@ -140,12 +152,19 @@ document.getElementById('formSolicitud').addEventListener('submit', async e => {
 document.getElementById('formHistorico').addEventListener('submit', async e => {
   e.preventDefault();
   const anio = document.getElementById('histAnio').value;
-  const dias = document.getElementById('histDias').value;
+  const dias = parseFloat(document.getElementById('histDias').value);
+  const container = document.getElementById('alertaHistorico');
+  container.innerHTML = '';
+
+  if (dias > 15) {
+    container.innerHTML = `<div class="alert alert-danger alert-dismissible fade show">Los días tomados no pueden superar 15 por año.<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>`;
+    return;
+  }
+
   try {
     await api.registrarHistorico({ empleado_id: id, anio, dias });
     window.location.reload();
   } catch (err) {
-    const container = document.getElementById('alertaHistorico');
     container.innerHTML = `<div class="alert alert-danger alert-dismissible fade show">${err.message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>`;
   }
 });

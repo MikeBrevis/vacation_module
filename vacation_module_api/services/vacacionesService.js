@@ -67,13 +67,16 @@ async function calcularSaldo(empleadoId) {
   }
   // Si anosExperienciaTotal < 10, progresivosEmpresa queda en 0
 
+  const diasProgresivosBase = empleado.dias_progresivos_base || 0;
   const diasLegalesAcumulados = parseFloat((mesesEnEmpresa * 1.25).toFixed(4));
-  const diasProgresivosTotal = progresivosEmpresa;
+  // dias_progresivos_base = days accrued before joining (spec §1.2); must be added every year
+  const diasProgresivosTotal = diasProgresivosBase + progresivosEmpresa;
   const consumido = parseFloat(total_consumido);
   const saldoActual = parseFloat((diasLegalesAcumulados + diasProgresivosTotal - consumido).toFixed(2));
 
   return {
     diasLegalesAcumulados,
+    diasProgresivosBase,
     anosEnEmpresa,
     anosExternos,
     mesesExternos,
@@ -117,7 +120,7 @@ async function validarYCrearSolicitud(empleado_id, fecha_inicio, fecha_fin) {
 async function crearSolicitudHistorica(empleado_id, year, dias) {
   const fecha_inicio = `${year}-01-01`;
   const fecha_fin = `${year}-12-31`;
-  const dias_habiles = parseInt(dias, 10);
+  const dias_habiles = parseFloat(dias); // preserve 0.5-day precision
 
   const saldos = await calcularSaldo(empleado_id);
   
