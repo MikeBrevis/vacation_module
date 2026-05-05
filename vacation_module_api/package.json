@@ -1,0 +1,23 @@
+{
+  "name": "vacation_module_api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "axios": "^1.15.2",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "mysql2": "^3.22.2",
+    "node-cron": "^4.2.1",
+    "pdfkit": "^0.18.0",
+    "validador-digito-verificador-chile": "^1.0.7"
+  }
+}

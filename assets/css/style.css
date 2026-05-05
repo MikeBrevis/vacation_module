@@ -1,0 +1,8 @@
+.display-4 { font-size: 2.5rem; }
+.card-saldo { 
+  min-height: 120px; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  flex-direction: column; 
+}
