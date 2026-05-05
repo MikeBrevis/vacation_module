@@ -2,16 +2,7 @@ const express = require('express');
 const router = express.Router();
 const pool = require('../config/db');
 const { calcularSaldo } = require('../services/vacacionesService');
-const dv = require('validador-digito-verificador-chile').default;
-
-// Normaliza el RUT: quita puntos/espacios y agrega guión si falta
-function normalizarRut(rut) {
-  let limpio = rut.replace(/[\.\s]/g, '').trim();
-  if (!limpio.includes('-') && limpio.length > 1) {
-    limpio = limpio.slice(0, -1) + '-' + limpio.slice(-1);
-  }
-  return limpio;
-}
+const { normalizarRut, validarRut, formatearRut } = require('../utils/rutUtils');
 
 router.get('/', async (req, res) => {
   try {
@@ -45,10 +36,10 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ mensaje: 'El RUT es obligatorio.' });
     }
     const rutNormalizado = normalizarRut(rut);
-    if (!dv.Validar(rutNormalizado)) {
+    if (!validarRut(rutNormalizado)) {
       return res.status(400).json({ mensaje: 'El RUT ingresado no es válido. Verifique el dígito verificador.' });
     }
-    const rutFormateado = dv.DarFormato(rutNormalizado);
+    const rutFormateado = formatearRut(rutNormalizado);
 
     const anosExt = parseInt(anos_externos) || 0;
     const mesesExt = parseInt(meses_externos) || 0;
@@ -79,11 +70,11 @@ router.put('/:id', async (req, res) => {
     
     if (rut) {
       const rutNormalizado = normalizarRut(rut);
-      if (!dv.Validar(rutNormalizado)) {
+      if (!validarRut(rutNormalizado)) {
         return res.status(400).json({ mensaje: 'El RUT ingresado no es válido. Verifique el dígito verificador.' });
       }
     }
-    const rutFormateado = rut ? dv.DarFormato(normalizarRut(rut)) : undefined;
+    const rutFormateado = rut ? formatearRut(normalizarRut(rut)) : undefined;
 
     const anosExt = anos_externos !== undefined ? parseInt(anos_externos) || 0 : undefined;
     const mesesExt = meses_externos !== undefined ? parseInt(meses_externos) || 0 : undefined;
