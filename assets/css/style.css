@@ -1,8 +1,249 @@
-.display-4 { font-size: 2.5rem; }
-.card-saldo { 
-  min-height: 120px; 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-  flex-direction: column; 
+/* ============================================================
+   AndeCorp – Vacation Module  |  assets/css/style.css
+   Design tokens follow the ande_design skill specification.
+   ============================================================ */
+
+/* --- CSS Variables (brand tokens) -------------------------- */
+:root {
+  --blue:   #14213D;
+  --yellow: #FFB512;
+  --white:  #FFFFFF;
+  --gray:   #E5E5E5;
 }
+
+/* --- Global ------------------------------------------------- */
+body {
+  background-color: var(--gray);
+  font-family: sans-serif;
+  color: var(--blue);
+}
+
+/* --- Page Header Card --------------------------------------- */
+.header-card {
+  background-color: var(--blue);
+  border: none;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  box-shadow: 0 2px 8px rgba(20, 33, 61, 0.08);
+}
+
+.header-title {
+  font-family: 'Anton', sans-serif;
+  font-size: 1.75rem;
+  color: var(--yellow);
+  margin: 0;
+  padding: 0 10px;
+  margin-left: 20px;
+  font-weight: bold;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* Search input */
+.search-input {
+  border: 1px solid #dde3ef;
+  border-radius: 8px;
+  padding: 0.45rem 0.9rem 0.45rem 2.25rem;
+  font-size: 0.9rem;
+  color: var(--blue);
+  background-color: var(--white);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2314213D' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 0.75rem center;
+  min-width: 220px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.search-input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(20, 33, 61, 0.1);
+}
+
+/* Buttons */
+.btn-sync {
+  background-color: var(--gray);
+  color: var(--blue);
+  border: none;
+  border-radius: 8px;
+  padding: 0.45rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: opacity 0.2s;
+}
+
+.btn-sync:hover {
+  opacity: 0.85;
+  color: var(--white);
+}
+
+.btn-new {
+  background-color: var(--yellow);
+  color: var(--blue);
+  border: none;
+  border-radius: 8px;
+  padding: 0.45rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: filter 0.2s;
+}
+
+.btn-new:hover {
+  filter: brightness(0.92);
+  color: var(--blue);
+}
+
+/* --- Employees Table Card ----------------------------------- */
+.table-card {
+  background-color: var(--white);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(20, 33, 61, 0.08);
+  overflow: hidden;
+}
+
+/* Table head */
+#tablaEmpleados thead tr {
+  background-color: var(--blue);
+}
+
+#tablaEmpleados thead th {
+  font-family: sans-serif;
+  color: var(--gray);
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 1rem;
+  border: none;
+  white-space: nowrap;
+  background-color: var(--blue);
+}
+
+/* Table body rows */
+#tablaEmpleados tbody tr {
+  border-bottom: 1px solid var(--blue);
+  transition: background-color 0.15s;
+}
+
+#tablaEmpleados tbody tr:hover {
+  background-color: #f7f8fb;
+}
+
+#tablaEmpleados tbody td {
+  padding: 0.85rem 1.2rem;
+  vertical-align: middle;
+  border: none;
+  font-size: 1rem;
+  color: var(--blue);
+}
+
+/* RUT column – muted */
+.td-rut {
+  color: #6b7898;
+  font-size: 0.85rem;
+}
+
+/* Name cell with avatar */
+.name-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+/* Avatar circle */
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--white);
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+/* Deterministic avatar colors using nth-child */
+.avatar-blue   { background-color: #7a94c1; }
+.avatar-yellow { background-color: var(--yellow); color: var(--blue); }
+.avatar-gray   { background-color: #a3b0c8; }
+
+/* Action icons */
+.action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #8899bb;
+  padding: 0.3rem 0.55rem;
+  border-radius: 6px;
+  font-size: 1.25rem;       /* larger icons */
+  line-height: 1;
+  text-decoration: none;    /* removes underscore on <a> */
+  display: inline-flex;
+  align-items: center;
+  transition: color 0.15s, background-color 0.15s;
+}
+
+.action-btn + .action-btn {
+  margin-left: 0.4rem;      /* space between icons */
+}
+
+.action-btn:hover {
+  color: var(--blue);
+  background-color: #eef1f8;
+}
+
+/* Saldo – centered, bold */
+.td-saldo {
+  font-weight: 700;
+  text-align: center;
+}
+
+/* --- Modal overrides --------------------------------------- */
+.modal-header {
+  background-color: var(--blue);
+  color: var(--white);
+  border-bottom: none;
+}
+
+.modal-title {
+  font-family: 'Anton', sans-serif;
+  letter-spacing: 0.06em;
+}
+
+.modal-header .btn-close {
+  filter: invert(1);
+}
+
+.modal-footer .btn-primary,
+.modal-footer .btn[type="submit"] {
+  background-color: var(--yellow);
+  border-color: var(--yellow);
+  color: var(--blue);
+  font-weight: 700;
+}
+
+.modal-footer .btn-primary:hover,
+.modal-footer .btn[type="submit"]:hover {
+  filter: brightness(0.92);
+}
+
+/* --- Google Fonts import ----------------------------------- */
+@import url('https://fonts.googleapis.com/css2?family=Anton&display=swap');

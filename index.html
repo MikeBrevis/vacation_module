@@ -2,66 +2,92 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Registro vacacional - AndeCorp</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro Vacacional – AndeCorp</title>
+  <meta name="description" content="Sistema de registro y control vacacional de empleados AndeCorp.">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-  <div class="container mt-4">
-    <div class="d-flex justify-content-between mb-3">
-      <h2>Registro vacacional - AndeCorp</h2>
-      <div>
-        <input type="text" id="busqueda" class="form-control d-inline-block w-auto" placeholder="Buscar empleado...">
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalNuevoEmpleado">Nuevo Empleado</button>
-        <button class="btn btn-outline-secondary" id="btnSincronizar">Sincronizar Feriados</button>
+  <div class="container py-4">
+
+    <!-- ── Header Card ── -->
+    <div class="header-card mb-4">
+      <h1 class="header-title">Registro Vacacional</h1>
+      <div class="header-actions">
+        <input type="text" id="busqueda" class="search-input" placeholder="Buscar empleado...">
+        <button class="btn-sync" id="btnSincronizar">
+          <i class="bi bi-arrow-repeat"></i> Sincronizar Feriados
+        </button>
+        <button class="btn-new" data-bs-toggle="modal" data-bs-target="#modalNuevoEmpleado">
+          <i class="bi bi-plus-lg"></i> Nuevo Empleado
+        </button>
       </div>
     </div>
-    
-    <table class="table table-bordered table-hover text-center" id="tablaEmpleados">
-      <thead class="table-light">
-        <tr>
-          <th>RUT</th>
-          <th>Nombre</th>
-          <th>Cargo</th>
-          <th>Saldo Disponible</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
 
-  <!-- Modal Nuevo Empleado -->
-  <div class="modal fade" id="modalNuevoEmpleado" tabindex="-1">
-    <div class="modal-dialog">
+    <!-- ── Employees Table ── -->
+    <div class="table-card text-center">
+      <table class="table text-center" id="tablaEmpleados">
+        <thead>
+          <tr>
+            <th>RUT</th>
+            <th>Nombre</th>
+            <th>Cargo</th>
+            <th>Saldo Disponible</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+  </div><!-- /container -->
+
+
+  <!-- ══ Modal: Nuevo Empleado ══════════════════════════════ -->
+  <div class="modal fade" id="modalNuevoEmpleado" tabindex="-1" aria-labelledby="modalNuevoEmpleadoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
-        <form id="formNuevoEmpleado">
+        <form id="formNuevoEmpleado" class="text-center">
           <div class="modal-header">
-            <h5 class="modal-title">Nuevo Empleado</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            <h5 class="modal-title" id="modalNuevoEmpleadoLabel">Nuevo Empleado</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
           </div>
           <div class="modal-body">
             <div id="alertaNuevoEmpleado"></div>
-            <div class="mb-2"><label>RUT</label><input type="text" id="rut" class="form-control" required></div>
-            <div class="mb-2"><label>Nombre Completo</label><input type="text" id="nombre" class="form-control" required></div>
-            <div class="mb-2"><label>Cargo</label><input type="text" id="cargo" class="form-control" required></div>
-            <div class="mb-2"><label>Fecha Ingreso</label><input type="date" id="fechaIngreso" class="form-control" required></div>
-            
+            <div class="mb-2">
+              <label class="form-label">RUT</label>
+              <input type="text" id="rut" class="form-control" required>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Nombre Completo</label>
+              <input type="text" id="nombre" class="form-control" required>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Cargo</label>
+              <input type="text" id="cargo" class="form-control" required>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Fecha Ingreso</label>
+              <input type="date" id="fechaIngreso" class="form-control" required>
+            </div>
+
             <hr class="my-3">
             <p class="text-muted small mb-2">Experiencia laboral previa (certificado AFP)</p>
 
             <div class="form-check mb-3">
               <input class="form-check-input" type="checkbox" id="cumple10">
-              <label class="form-check-label">Acredita 10 años de cotizaciones base</label>
+              <label class="form-check-label" for="cumple10">Acredita 10 años de cotizaciones base</label>
             </div>
-            
+
             <div class="row mb-2">
               <div class="col-6">
-                <label>Años en empresas anteriores</label>
+                <label class="form-label">Años en empresas anteriores</label>
                 <input type="number" id="anosExternos" class="form-control" value="0" min="0" max="9">
               </div>
               <div class="col-6">
-                <label>Meses adicionales</label>
+                <label class="form-label">Meses adicionales</label>
                 <input type="number" id="mesesExternos" class="form-control" value="0" min="0" max="11">
               </div>
             </div>
@@ -74,14 +100,15 @@
     </div>
   </div>
 
-  <!-- Modal Editar Empleado -->
-  <div class="modal fade" id="modalEditarEmpleado" tabindex="-1" aria-hidden="true">
+
+  <!-- ══ Modal: Editar Empleado ═════════════════════════════ -->
+  <div class="modal fade" id="modalEditarEmpleado" tabindex="-1" aria-labelledby="modalEditarEmpleadoLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <form id="formEditarEmpleado">
           <div class="modal-header">
-            <h5 class="modal-title">Editar Empleado</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <h5 class="modal-title" id="modalEditarEmpleadoLabel">Editar Empleado</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
           </div>
           <div class="modal-body">
             <div id="alertaEditarEmpleado"></div>
@@ -104,25 +131,26 @@
 
             <div class="form-check mb-3">
               <input class="form-check-input" type="checkbox" id="editCumple10">
-              <label class="form-check-label">Acredita 10 años de cotizaciones base</label>
+              <label class="form-check-label" for="editCumple10">Acredita 10 años de cotizaciones base</label>
             </div>
-            
+
             <div class="row mb-2">
               <div class="col-6">
-                <label>Años en empresas anteriores</label>
+                <label class="form-label">Años en empresas anteriores</label>
                 <input type="number" id="editAnosExternos" class="form-control" value="0" min="0" max="9">
               </div>
               <div class="col-6">
-                <label>Meses adicionales</label>
+                <label class="form-label">Meses adicionales</label>
                 <input type="number" id="editMesesExternos" class="form-control" value="0" min="0" max="11">
               </div>
             </div>
 
             <hr>
 
-            <!-- Zona de peligro colapsable -->
+            <!-- Danger zone -->
             <div class="mt-2">
-              <button type="button" class="btn btn-outline-danger btn-sm w-100" data-bs-toggle="collapse" data-bs-target="#zonaEliminar">
+              <button type="button" class="btn btn-outline-danger btn-sm w-100"
+                data-bs-toggle="collapse" data-bs-target="#zonaEliminar">
                 Zona de Peligro
               </button>
               <div class="collapse mt-3" id="zonaEliminar">
@@ -142,6 +170,7 @@
       </div>
     </div>
   </div>
+
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="assets/js/api.js"></script>

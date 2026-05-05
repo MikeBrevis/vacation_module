@@ -7,20 +7,45 @@ async function cargarTabla() {
   } catch (err) { alert('Error: ' + err.message); }
 }
 
+// Avatar color palette – cycles through 3 brand-friendly hues
+const AVATAR_COLORS = ['avatar-blue', 'avatar-yellow', 'avatar-gray'];
+
+function getInitials(name) {
+  return name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
+}
+
 function renderTabla(empleados) {
   const tbody = document.querySelector('#tablaEmpleados tbody');
   tbody.innerHTML = '';
-  empleados.forEach(emp => {
-    const color = emp.saldoActual < 5 ? 'danger' : emp.saldoActual <= 10 ? 'warning' : 'success';
+  empleados.forEach((emp, idx) => {
+    const avatarClass = AVATAR_COLORS[idx % AVATAR_COLORS.length];
+    const initials = getInitials(emp.nombre_completo);
     tbody.innerHTML += `
       <tr>
-        <td>${emp.rut}</td>
-        <td>${emp.nombre_completo}</td>
-        <td>${emp.cargo}</td>
-        <td class="fw-bold text-${color}">${emp.saldoActual}</td>
+        <td class="td-rut">${emp.rut}</td>
         <td>
-          <a href="empleado.html?id=${emp.id}" class="btn btn-sm btn-info">Ver Detalle</a>
-          <button class="btn btn-sm btn-warning btn-edit" data-id="${emp.id}" data-rut="${emp.rut}" data-nombre="${emp.nombre_completo}" data-cargo="${emp.cargo}" data-cumple10="${emp.cumple_10_anos_base}" data-anosext="${emp.anos_externos || 0}" data-mesesext="${emp.meses_externos || 0}">Editar</button>
+          <div class="name-cell">
+            <span class="avatar ${avatarClass}">${initials}</span>
+            <strong>${emp.nombre_completo}</strong>
+          </div>
+        </td>
+        <td>${emp.cargo}</td>
+        <td class="td-saldo">${parseFloat(emp.saldoActual).toFixed(2)}</td>
+        <td class="text-center">
+          <a href="empleado.html?id=${emp.id}" class="action-btn" title="Ver Detalle">
+            <i class="bi bi-eye"></i>
+          </a>
+          <button class="action-btn btn-edit"
+            data-id="${emp.id}"
+            data-rut="${emp.rut}"
+            data-nombre="${emp.nombre_completo}"
+            data-cargo="${emp.cargo}"
+            data-cumple10="${emp.cumple_10_anos_base}"
+            data-anosext="${emp.anos_externos || 0}"
+            data-mesesext="${emp.meses_externos || 0}"
+            title="Editar">
+            <i class="bi bi-pencil"></i>
+          </button>
         </td>
       </tr>
     `;
