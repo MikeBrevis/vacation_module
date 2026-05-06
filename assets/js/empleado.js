@@ -96,7 +96,7 @@ function renderPanelSaldos(saldo) {
   document.getElementById('saldoActual').className = `text-${color} fw-bold display-4`;
   
   document.getElementById('saldoLegales').textContent = saldo.diasLegalesAcumulados;
-  document.getElementById('saldoProgresivos').textContent = saldo.diasProgresivosTotal;
+  document.getElementById('saldoProgresivos').textContent = saldo.diasProgresivosAnuales;
   document.getElementById('saldoConsumidos').textContent = saldo.diasConsumidos;
 }
 

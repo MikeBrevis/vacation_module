@@ -12,8 +12,7 @@ async function run() {
       nombre_completo: 'API Tester',
       cargo: 'QA',
       fecha_ingreso: '2022-01-01',
-      cumple_10_anos_base: false,
-      dias_progresivos_base: 0
+      cumple_10_anos_base: false
     });
     console.log(res1.data);
     empId = res1.data.id;

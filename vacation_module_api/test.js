@@ -6,8 +6,8 @@ async function run() {
   try {
     // Insertar empleado
     const [result] = await pool.query(`
-      INSERT INTO empleados (rut, nombre_completo, cargo, fecha_ingreso, cumple_10_anos_base, dias_progresivos_base)
-      VALUES ('12345678-9', 'Usuario Prueba', 'Desarrollador', '2020-01-01', 1, 5)
+      INSERT INTO empleados (rut, nombre_completo, cargo, fecha_ingreso, cumple_10_anos_base)
+      VALUES ('12345678-9', 'Usuario Prueba', 'Desarrollador', '2020-01-01', 1)
     `);
     
     const empleadoId = result.insertId;

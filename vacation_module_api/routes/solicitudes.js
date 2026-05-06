@@ -53,7 +53,7 @@ router.get('/:id/pdf', async (req, res) => {
       fecha_fin,
       dias_habiles: solicitud.dias_habiles_consumidos,
       dias_inhabiles,
-      dias_progresivos: saldo.diasProgresivosTotal,
+      dias_progresivos: saldo.diasProgresivosAnuales,
       dias_pendientes: saldo.saldoActual,
       es_historico,
       anio

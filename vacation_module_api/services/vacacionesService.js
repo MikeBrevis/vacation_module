@@ -51,32 +51,37 @@ async function calcularSaldo(empleadoId) {
   const anosExperienciaTotal = Math.floor(mesesExperienciaTotal / 12);
 
   let progresivosEmpresa = 0;
+  let mesesPostBase = 0;
 
   if (tieneBaseDiezAnos) {
     // Caso B: Ya tiene la base de 10 años acreditada
     // El primer día progresivo se otorga al cumplir 3 años en la empresa actual
+    mesesPostBase = mesesEnEmpresa;
     progresivosEmpresa = Math.floor(anosEnEmpresa / 3);
   } else if (anosExperienciaTotal >= 10) {
     // La base se alcanza combinando experiencia externa + empresa actual
     // Calcular cuántos meses en la empresa actual se necesitaron para llegar a 10 años
     const mesesParaBase = Math.max(0, (10 * 12) - mesesTotalExternos);
     // Meses en la empresa actual después de cumplir la base
-    const mesesPostBase = Math.max(0, mesesEnEmpresa - mesesParaBase);
+    mesesPostBase = Math.max(0, mesesEnEmpresa - mesesParaBase);
     const anosPostBase = Math.floor(mesesPostBase / 12);
     progresivosEmpresa = Math.floor(anosPostBase / 3);
   }
-  // Si anosExperienciaTotal < 10, progresivosEmpresa queda en 0
+  // Calcular dias progresivos historicos acumulados
+  let diasProgresivosAcumulados = 0;
+  const anosPostBaseTotales = Math.floor(mesesPostBase / 12);
+  for (let y = 1; y <= anosPostBaseTotales; y++) {
+    diasProgresivosAcumulados += Math.floor(y / 3);
+  }
 
-  const diasProgresivosBase = empleado.dias_progresivos_base || 0;
   const diasLegalesAcumulados = parseFloat((mesesEnEmpresa * 1.25).toFixed(4));
-  // dias_progresivos_base = days accrued before joining (spec §1.2); must be added every year
-  const diasProgresivosTotal = diasProgresivosBase + progresivosEmpresa;
+  const diasProgresivosTotal = diasProgresivosAcumulados;
+  const diasProgresivosAnuales = progresivosEmpresa;
   const consumido = parseFloat(total_consumido);
-  const saldoActual = parseFloat((diasLegalesAcumulados + diasProgresivosTotal - consumido).toFixed(2));
+  const saldoActual = Math.floor(diasLegalesAcumulados + diasProgresivosTotal - consumido);
 
   return {
     diasLegalesAcumulados,
-    diasProgresivosBase,
     anosEnEmpresa,
     anosExternos,
     mesesExternos,
@@ -84,6 +89,7 @@ async function calcularSaldo(empleadoId) {
     anosExperienciaTotal,
     progresivosEmpresa,
     diasProgresivosTotal,
+    diasProgresivosAnuales,
     diasConsumidos: consumido,
     saldoActual
   };

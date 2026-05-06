@@ -66,7 +66,7 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { rut, nombre_completo, cargo, fecha_ingreso, cumple_10_anos_base, dias_progresivos_base, anos_externos, meses_externos } = req.body;
+    const { rut, nombre_completo, cargo, fecha_ingreso, cumple_10_anos_base, anos_externos, meses_externos } = req.body;
     
     if (rut) {
       const rutNormalizado = normalizarRut(rut);
@@ -95,7 +95,7 @@ router.put('/:id', async (req, res) => {
     if (cumple_10_anos_base !== undefined) campos.cumple_10_anos_base = cumple_10_anos_base ? 1 : 0;
     if (anosExt !== undefined) campos.anos_externos = anosExt;
     if (mesesExt !== undefined) campos.meses_externos = mesesExt;
-    if (dias_progresivos_base !== undefined) campos.dias_progresivos_base = parseInt(dias_progresivos_base) || 0;
+
 
     const keys = Object.keys(campos);
     if (keys.length === 0) return res.status(400).json({ mensaje: 'No se enviaron campos para actualizar.' });

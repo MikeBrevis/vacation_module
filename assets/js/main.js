@@ -42,7 +42,7 @@ function renderTabla(empleados) {
             data-cargo="${emp.cargo}"
             data-fechaingreso="${emp.fecha_ingreso ? emp.fecha_ingreso.split('T')[0] : ''}"
             data-cumple10="${emp.cumple_10_anos_base}"
-            data-diasprogrbase="${emp.dias_progresivos_base || 0}"
+
             data-anosext="${emp.anos_externos || 0}"
             data-mesesext="${emp.meses_externos || 0}"
             title="Editar">
@@ -137,11 +137,7 @@ document.querySelector('#tablaEmpleados').addEventListener('click', e => {
     const cumple10 = btn.dataset.cumple10 === '1' || btn.dataset.cumple10 === 'true';
     document.getElementById('editCumple10').checked = cumple10;
 
-    const diasProgrBase = document.getElementById('editDiasProgresivosBase');
-    const diasProgrContainer = document.getElementById('editDiasProgresivosContainer');
-    diasProgrBase.value = btn.dataset.diasprogrbase || 0;
-    // Show dias_progresivos_base only when cumple10 is checked
-    diasProgrContainer.style.display = cumple10 ? '' : 'none';
+
 
     const editAnos = document.getElementById('editAnosExternos');
     const editMeses = document.getElementById('editMesesExternos');
@@ -157,18 +153,17 @@ document.querySelector('#tablaEmpleados').addEventListener('click', e => {
 document.getElementById('editCumple10').addEventListener('change', e => {
   const editAnos = document.getElementById('editAnosExternos');
   const editMeses = document.getElementById('editMesesExternos');
-  const diasProgrContainer = document.getElementById('editDiasProgresivosContainer');
+
   if (e.target.checked) {
     editAnos.disabled = true;
     editMeses.disabled = true;
     editAnos.value = 0;
     editMeses.value = 0;
-    diasProgrContainer.style.display = '';
+
   } else {
     editAnos.disabled = false;
     editMeses.disabled = false;
-    diasProgrContainer.style.display = 'none';
-    document.getElementById('editDiasProgresivosBase').value = 0;
+
   }
 });
 
@@ -184,7 +179,7 @@ document.getElementById('formEditarEmpleado').addEventListener('submit', async e
     cargo: document.getElementById('editCargo').value,
     fecha_ingreso: document.getElementById('editFechaIngreso').value,
     cumple_10_anos_base: document.getElementById('editCumple10').checked,
-    dias_progresivos_base: parseInt(document.getElementById('editDiasProgresivosBase').value || 0),
+
     anos_externos: parseInt(document.getElementById('editAnosExternos').value || 0),
     meses_externos: parseInt(document.getElementById('editMesesExternos').value || 0)
   };
