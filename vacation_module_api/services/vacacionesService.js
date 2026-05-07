@@ -80,6 +80,34 @@ async function calcularSaldo(empleadoId) {
   const consumido = parseFloat(total_consumido);
   const saldoActual = Math.floor(diasLegalesAcumulados + diasProgresivosTotal - consumido);
 
+  const detalleAnual = [];
+  for (let i = 1; i <= anosEnEmpresa; i++) {
+    let mesesParaBaseCalculo = 0;
+    if (!tieneBaseDiezAnos) {
+       mesesParaBaseCalculo = Math.max(0, (10 * 12) - mesesTotalExternos);
+    }
+    const mesesPostBaseEnAniversario = Math.max(0, (i * 12) - mesesParaBaseCalculo);
+    const anosPostBaseEnAniversario = Math.floor(mesesPostBaseEnAniversario / 12);
+    const progr = Math.floor(anosPostBaseEnAniversario / 3);
+    
+    detalleAnual.push({
+      periodo: `${ingreso.getFullYear() + i - 1} - ${ingreso.getFullYear() + i}`,
+      base: 15,
+      progresivos: progr,
+      total: 15 + progr
+    });
+  }
+  
+  const mesesProporcionales = mesesEnEmpresa % 12;
+  if (mesesProporcionales > 0 || anosEnEmpresa === 0) {
+    detalleAnual.push({
+      periodo: `${ingreso.getFullYear() + anosEnEmpresa} - Actual`,
+      base: parseFloat((mesesProporcionales * 1.25).toFixed(2)),
+      progresivos: 0,
+      total: parseFloat((mesesProporcionales * 1.25).toFixed(2))
+    });
+  }
+
   return {
     diasLegalesAcumulados,
     anosEnEmpresa,
@@ -91,7 +119,8 @@ async function calcularSaldo(empleadoId) {
     diasProgresivosTotal,
     diasProgresivosAnuales,
     diasConsumidos: consumido,
-    saldoActual
+    saldoActual,
+    detalleAnual
   };
 }
 

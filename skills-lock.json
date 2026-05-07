@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "skills": {
+    "readme-blueprint-generator": {
+      "source": "github/awesome-copilot",
+      "sourceType": "github",
+      "skillPath": "skills/readme-blueprint-generator/SKILL.md",
+      "computedHash": "e2c7dabf2e455794260f1516e2ceda6a82dc92a409578cc184fcb0f45bddca54"
+    },
+    "readme-i18n": {
+      "source": "xixu-me/skills",
+      "sourceType": "github",
+      "skillPath": "skills/readme-i18n/SKILL.md",
+      "computedHash": "d441385bfe267d3c66de52af6f969a837d9d3a35a3dac78568605aaad52e7241"
+    }
+  }
+}

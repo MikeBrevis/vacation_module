@@ -16,7 +16,7 @@
   </style>
 </head>
 <body>
-  <div class="container mt-4">
+  <div class="container mt-3">
     <a href="index.html" class="btn btn-secondary mb-3">&larr; Volver</a>
     
     <div class="card mb-4 shadow-sm">
@@ -50,6 +50,33 @@
               </tr>
             </tbody>
           </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="accordion mb-3 shadow-sm" id="accordionDetalle">
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="headingDetalle">
+          <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDetalle" aria-expanded="false" aria-controls="collapseDetalle">
+            Detalle de Días de Vacaciones por Año
+          </button>
+        </h2>
+        <div id="collapseDetalle" class="accordion-collapse collapse" aria-labelledby="headingDetalle" data-bs-parent="#accordionDetalle">
+          <div class="accordion-body p-0">
+            <table class="table table-hover mb-0 text-center align-middle" style="font-size: 0.95rem;">
+              <thead class="table-light">
+                <tr>
+                  <th>Periodo</th>
+                  <th>Días Base</th>
+                  <th>Días Progresivos</th>
+                  <th>Total Ganado</th>
+                </tr>
+              </thead>
+              <tbody id="tablaDetalleAnual">
+                <!-- Se llena por JS -->
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -88,7 +115,6 @@
         </div>
       </div>
     </div>
-
     <div class="row">
       <div class="col-md-4">
         <div class="card shadow-sm mb-4">

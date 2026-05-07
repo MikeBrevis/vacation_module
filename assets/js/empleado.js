@@ -56,6 +56,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     renderPanelSaldos(datos.saldo);
+    if (datos.saldo.detalleAnual) renderDetalleAnual(datos.saldo.detalleAnual);
     renderHistorial(datos.solicitudes);
 
     // Cargar feriados e inicializar Flatpickr
@@ -98,6 +99,25 @@ function renderPanelSaldos(saldo) {
   document.getElementById('saldoLegales').textContent = saldo.diasLegalesAcumulados;
   document.getElementById('saldoProgresivos').textContent = saldo.diasProgresivosAnuales;
   document.getElementById('saldoConsumidos').textContent = saldo.diasConsumidos;
+}
+
+function renderDetalleAnual(detalle) {
+  const tbody = document.getElementById('tablaDetalleAnual');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  detalle.forEach(d => {
+    const isProgresivo = d.progresivos > 0;
+    const rowClass = isProgresivo ? 'table-primary fw-bold' : '';
+    const spanProgresivo = isProgresivo ? `<span class="badge bg-primary text-white ms-1">+${d.progresivos}</span>` : '0';
+    tbody.innerHTML += `
+      <tr class="${rowClass}">
+        <td>${d.periodo}</td>
+        <td>${d.base}</td>
+        <td>${spanProgresivo}</td>
+        <td>${d.total}</td>
+      </tr>
+    `;
+  });
 }
 
 function renderHistorial(solicitudes) {

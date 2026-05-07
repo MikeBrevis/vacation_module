@@ -129,7 +129,6 @@ body {
 #tablaEmpleados thead th {
   font-family: sans-serif;
   color: var(--gray);
-  font-size: 1rem;
   font-weight: 700;
   text-transform: uppercase;
   padding: 1rem;
@@ -152,7 +151,7 @@ body {
   padding: 0.85rem 1.2rem;
   vertical-align: middle;
   border: none;
-  font-size: 1rem;
+  font-size: 1.1rem;
   color: var(--blue);
 }
 
@@ -166,6 +165,7 @@ body {
 .name-cell {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.65rem;
 }
 
@@ -186,7 +186,7 @@ body {
 
 /* Deterministic avatar colors using nth-child */
 .avatar-blue {
-  background-color: #7a94c1;
+  background-color: var(--blue);
 }
 
 .avatar-yellow {
@@ -195,7 +195,7 @@ body {
 }
 
 .avatar-gray {
-  background-color: #a3b0c8;
+  background-color: var(--gray)
 }
 
 /* Action icons */
@@ -203,10 +203,11 @@ body {
   background: none;
   border: none;
   cursor: pointer;
-  color: #8899bb;
-  padding: 0.3rem 0.55rem;
+  color: var(--blue);
+  padding: 1rem;
+  margin: 0 0.25rem 0 0.25rem;
   border-radius: 6px;
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   /* larger icons */
   line-height: 1;
   text-decoration: none;
@@ -216,14 +217,9 @@ body {
   transition: color 0.15s, background-color 0.15s;
 }
 
-.action-btn+.action-btn {
-  margin-left: 0.4rem;
-  /* space between icons */
-}
-
 .action-btn:hover {
-  color: var(--blue);
-  background-color: #eef1f8;
+
+  background-color: var(--yellow);
 }
 
 /* Saldo – centered, bold */
