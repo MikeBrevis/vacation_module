@@ -67,6 +67,8 @@
                   <th>Días Base</th>
                   <th>Días Progresivos</th>
                   <th>Total Ganado</th>
+                  <th>Consumidos</th>
+                  <th>Disponibles</th>
                 </tr>
               </thead>
               <tbody id="tablaDetalleAnual">
@@ -128,6 +130,12 @@
             <div id="alertaSolicitud"></div>
             <form id="formSolicitud">
               <div class="mb-3">
+                <label>Periodo Disponible</label>
+                <select id="solPeriodo" class="form-select" required>
+                  <option value="">Cargando periodos...</option>
+                </select>
+              </div>
+              <div class="mb-3">
                 <label>Fecha de Inicio</label>
                 <input type="text" id="fechaInicio" class="form-control bg-white" placeholder="Seleccione fecha" required>
               </div>
@@ -150,9 +158,9 @@
             <div id="alertaHistorico"></div>
             <form id="formHistorico">
               <div class="mb-3">
-                <label>Año</label>
+                <label>Periodo</label>
                 <select id="histAnio" class="form-select" required>
-                  <option value="">Cargando años...</option>
+                  <option value="">Cargando periodos...</option>
                 </select>
               </div>
               <div class="mb-3">

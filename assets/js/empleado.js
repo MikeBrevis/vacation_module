@@ -34,17 +34,31 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Poblar el selector de años históricos (desde su ingreso hasta el año actual)
     const selectAnio = document.getElementById('histAnio');
-    selectAnio.innerHTML = '<option value="">Seleccione un año...</option>';
-    for (let y = hoy.getFullYear(); y > ingreso.getFullYear(); y--) {
+    selectAnio.innerHTML = '<option value="">Seleccione un periodo...</option>';
+    for (let y = hoy.getFullYear() - 1; y >= ingreso.getFullYear(); y--) {
       const option = document.createElement('option');
       option.value = y;
       if (anosRegistrados.has(String(y))) {
-        option.textContent = `${y} (registrado)`;
+        option.textContent = `${y}-${y + 1} (registrado)`;
         option.disabled = true;
       } else {
-        option.textContent = y;
+        option.textContent = `${y}-${y + 1}`;
       }
       selectAnio.appendChild(option);
+    }
+
+    // Poblar el selector de periodos disponibles para nueva solicitud
+    const selectSolPeriodo = document.getElementById('solPeriodo');
+    selectSolPeriodo.innerHTML = '<option value="">Seleccione un periodo disponible...</option>';
+    if (datos.saldo && datos.saldo.detalleAnual) {
+      datos.saldo.detalleAnual.forEach(p => {
+        if (p.disponibles > 0) {
+          const opt = document.createElement('option');
+          opt.value = p.startYear;
+          opt.textContent = `${p.periodo} (${p.disponibles} días disp.)`;
+          selectSolPeriodo.appendChild(opt);
+        }
+      });
     }
 
     renderPanelSaldos(datos.saldo);
@@ -77,8 +91,25 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     };
     
-    flatpickr('#fechaInicio', flatpickrConfig);
-    flatpickr('#fechaFin', flatpickrConfig);
+    const fpInicio = flatpickr('#fechaInicio', flatpickrConfig);
+    const fpFin = flatpickr('#fechaFin', flatpickrConfig);
+    
+    fpInicio.config.onChange.push((selectedDates, dateStr, instance) => {
+      if (selectedDates.length > 0) {
+        fpFin.set('minDate', selectedDates[0]);
+        fpFin.jumpToDate(selectedDates[0]);
+      }
+    });
+    
+    document.getElementById('solPeriodo').addEventListener('change', e => {
+      const startYear = e.target.value;
+      if (startYear) {
+        // Posicionar el calendario en el mes de ingreso de ese año
+        const jumpDate = new Date(parseInt(startYear), ingreso.getMonth(), 1);
+        fpInicio.jumpToDate(jumpDate);
+        fpFin.jumpToDate(jumpDate);
+      }
+    });
     
   } catch(err) { alert(err.message); }
 });
@@ -108,6 +139,8 @@ function renderDetalleAnual(detalle) {
         <td>${d.base}</td>
         <td>${spanProgresivo}</td>
         <td>${d.total}</td>
+        <td>${d.consumidos}</td>
+        <td>${d.disponibles}</td>
       </tr>
     `;
   });
@@ -129,7 +162,8 @@ function renderHistorial(solicitudes) {
     let tdProgresivo = `<td></td>`;
     
     if (fecha_inicio.endsWith('-01-01') && fecha_fin.endsWith('-12-31')) {
-      tdInicio = `<td class="text-muted fw-bold">Año ${anio}</td>`;
+      const startYear = parseInt(anio);
+      tdInicio = `<td class="text-muted fw-bold">Periodo ${startYear}-${startYear + 1}</td>`;
       tdTermino = `<td class="text-muted fw-bold">(Histórico)</td>`;
       tdProgresivo = `<td></td>`;
     } else if (s.es_progresivo) {
@@ -159,8 +193,9 @@ document.getElementById('formSolicitud').addEventListener('submit', async e => {
   const fechaInicio = document.getElementById('fechaInicio').value;
   const fechaFin = document.getElementById('fechaFin').value;
   const esProgresivo = document.getElementById('esProgresiva').checked;
+  const periodoAsignado = document.getElementById('solPeriodo').value;
   try {
-    await api.registrarSolicitud({ empleado_id: id, fecha_inicio: fechaInicio, fecha_fin: fechaFin, es_progresivo: esProgresivo });
+    await api.registrarSolicitud({ empleado_id: id, fecha_inicio: fechaInicio, fecha_fin: fechaFin, es_progresivo: esProgresivo, periodo_asignado: periodoAsignado });
     window.location.reload();
   } catch (err) {
     const container = document.getElementById('alertaSolicitud');

@@ -34,6 +34,7 @@ CREATE TABLE solicitudes_vacaciones (
     es_progresivo BOOLEAN DEFAULT FALSE,
     fecha_solicitud TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     ruta_comprobante VARCHAR(255) NULL,
+    periodo_asignado INT NULL,
     FOREIGN KEY (empleado_id) REFERENCES empleados(id) ON DELETE RESTRICT
 );
 

@@ -28,10 +28,28 @@ async function calcularSaldo(empleadoId) {
   const [[empleado]] = await pool.query('SELECT * FROM empleados WHERE id = ?', [empleadoId]);
   if (!empleado) throw new Error('Empleado no encontrado');
 
-  const [[{ total_consumido }]] = await pool.query(
-    'SELECT COALESCE(SUM(dias_habiles_consumidos), 0) AS total_consumido FROM solicitudes_vacaciones WHERE empleado_id = ?',
+  const [solicitudes] = await pool.query(
+    'SELECT * FROM solicitudes_vacaciones WHERE empleado_id = ?',
     [empleadoId]
   );
+  
+  let total_consumido = 0;
+  const consumidosPorPeriodo = {};
+  const consumidosBasePorPeriodo = {};
+  const consumidosProgPorPeriodo = {};
+  
+  solicitudes.forEach(s => {
+    total_consumido += parseFloat(s.dias_habiles_consumidos);
+    if (s.periodo_asignado) {
+      const dias = parseFloat(s.dias_habiles_consumidos);
+      consumidosPorPeriodo[s.periodo_asignado] = (consumidosPorPeriodo[s.periodo_asignado] || 0) + dias;
+      if (s.es_progresivo) {
+        consumidosProgPorPeriodo[s.periodo_asignado] = (consumidosProgPorPeriodo[s.periodo_asignado] || 0) + dias;
+      } else {
+        consumidosBasePorPeriodo[s.periodo_asignado] = (consumidosBasePorPeriodo[s.periodo_asignado] || 0) + dias;
+      }
+    }
+  });
 
   const hoy = new Date();
   const ingreso = new Date(empleado.fecha_ingreso);
@@ -80,21 +98,46 @@ async function calcularSaldo(empleadoId) {
     
     diasProgresivosAcumulados += progr;
 
+    const startYear = ingreso.getFullYear() + i - 1;
+    const consBase = consumidosBasePorPeriodo[startYear] || 0;
+    const consProg = consumidosProgPorPeriodo[startYear] || 0;
+    const consTotal = consBase + consProg;
+    
     detalleAnual.push({
-      periodo: `${ingreso.getFullYear() + i - 1} - ${ingreso.getFullYear() + i}`,
+      startYear,
+      periodo: `${startYear} - ${startYear + 1}`,
       base: 15,
       progresivos: progr,
-      total: 15 + progr
+      total: 15 + progr,
+      consumidos: consTotal,
+      consumidos_base: consBase,
+      consumidos_prog: consProg,
+      disponibles: (15 + progr) - consTotal,
+      disponibles_base: 15 - consBase,
+      disponibles_prog: progr - consProg
     });
   }
 
   const mesesProporcionales = mesesEnEmpresa % 12;
   if (mesesProporcionales > 0 || anosEnEmpresa === 0) {
+    const startYear = ingreso.getFullYear() + anosEnEmpresa;
+    const consBase = consumidosBasePorPeriodo[startYear] || 0;
+    const consProg = consumidosProgPorPeriodo[startYear] || 0;
+    const consTotal = consBase + consProg;
+    const tot = parseFloat((mesesProporcionales * 1.25).toFixed(2));
+    
     detalleAnual.push({
-      periodo: `${ingreso.getFullYear() + anosEnEmpresa} - Actual`,
-      base: parseFloat((mesesProporcionales * 1.25).toFixed(2)),
+      startYear,
+      periodo: `${startYear} - Actual`,
+      base: tot,
       progresivos: 0,
-      total: parseFloat((mesesProporcionales * 1.25).toFixed(2))
+      total: tot,
+      consumidos: consTotal,
+      consumidos_base: consBase,
+      consumidos_prog: consProg,
+      disponibles: tot - consTotal,
+      disponibles_base: tot - consBase,
+      disponibles_prog: 0 - consProg
     });
   }
 
@@ -121,28 +164,40 @@ async function calcularSaldo(empleadoId) {
 }
 
 // Lógica de validaciones para POST /api/solicitudes (6 pasos)
-async function validarYCrearSolicitud(empleado_id, fecha_inicio, fecha_fin, es_progresivo = false) {
+async function validarYCrearSolicitud(empleado_id, fecha_inicio, fecha_fin, es_progresivo = false, periodo_asignado) {
   if (new Date(fecha_inicio) > new Date(fecha_fin)) {
     throw new Error('Fecha de inicio posterior a fecha de fin');
   }
-
-  const hoyStr = new Date().toISOString().split('T')[0];
-  // Validación de fecha pasada removida temporalmente para permitir carga de historial.
 
   const dias_habiles = await calcularDiasHabiles(fecha_inicio, fecha_fin);
   if (dias_habiles === 0) {
     throw new Error('El rango seleccionado no contiene días hábiles');
   }
 
-  const saldos = await calcularSaldo(empleado_id);
+  if (!periodo_asignado) {
+    throw new Error('Debe seleccionar un periodo disponible.');
+  }
 
-  if (dias_habiles > saldos.saldoActual) {
-    throw new Error(`Saldo insuficiente. Días solicitados: ${dias_habiles}, Saldo: ${saldos.saldoActual}`);
+  const saldos = await calcularSaldo(empleado_id);
+  const periodoInfo = saldos.detalleAnual.find(p => p.startYear === parseInt(periodo_asignado));
+
+  if (!periodoInfo) {
+    throw new Error('El periodo seleccionado no es válido.');
+  }
+
+  if (es_progresivo) {
+    if (dias_habiles > periodoInfo.disponibles_prog) {
+      throw new Error(`Los días solicitados (${dias_habiles}) exceden el saldo progresivo disponible del periodo (${periodoInfo.disponibles_prog}).`);
+    }
+  } else {
+    if (dias_habiles > periodoInfo.disponibles_base) {
+      throw new Error(`Los días solicitados (${dias_habiles}) exceden el saldo base disponible del periodo (${periodoInfo.disponibles_base}). Marque la casilla de días progresivos si corresponde.`);
+    }
   }
 
   const [result] = await pool.query(
-    'INSERT INTO solicitudes_vacaciones (empleado_id, fecha_inicio, fecha_fin, dias_habiles_consumidos, es_progresivo) VALUES (?, ?, ?, ?, ?)',
-    [empleado_id, fecha_inicio, fecha_fin, dias_habiles, es_progresivo]
+    'INSERT INTO solicitudes_vacaciones (empleado_id, fecha_inicio, fecha_fin, dias_habiles_consumidos, es_progresivo, periodo_asignado) VALUES (?, ?, ?, ?, ?, ?)',
+    [empleado_id, fecha_inicio, fecha_fin, dias_habiles, es_progresivo, periodo_asignado]
   );
 
   return { insertId: result.insertId, dias_habiles, saldos_previos: saldos };
@@ -160,8 +215,8 @@ async function crearSolicitudHistorica(empleado_id, year, dias) {
   }
 
   const [result] = await pool.query(
-    'INSERT INTO solicitudes_vacaciones (empleado_id, fecha_inicio, fecha_fin, dias_habiles_consumidos) VALUES (?, ?, ?, ?)',
-    [empleado_id, fecha_inicio, fecha_fin, dias_habiles]
+    'INSERT INTO solicitudes_vacaciones (empleado_id, fecha_inicio, fecha_fin, dias_habiles_consumidos, periodo_asignado) VALUES (?, ?, ?, ?, ?)',
+    [empleado_id, fecha_inicio, fecha_fin, dias_habiles, year]
   );
 
   return { insertId: result.insertId, dias_habiles, saldos_previos: saldos };
