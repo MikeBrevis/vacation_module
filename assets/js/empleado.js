@@ -11,27 +11,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     const ingreso = new Date(datos.empleado.fecha_ingreso);
     const hoy = new Date();
-    const mesesTotales = (hoy.getFullYear() - ingreso.getFullYear()) * 12 + (hoy.getMonth() - ingreso.getMonth());
-    const anos = Math.floor(mesesTotales / 12);
-    const mesesRestantes = Math.max(0, mesesTotales % 12);
+    const mesesAndecorp = (hoy.getFullYear() - ingreso.getFullYear()) * 12 + (hoy.getMonth() - ingreso.getMonth());
+    const mesesPrevios = (datos.empleado.anos_externos * 12) + datos.empleado.meses_externos;
     
-    // Calcular experiencia total (cotizados)
-    let mesesCotizadosTotales = mesesTotales;
-    if (datos.empleado.cumple_10_anos_base) {
-      mesesCotizadosTotales += (10 * 12);
-    } else {
-      mesesCotizadosTotales += (datos.empleado.anos_externos * 12) + datos.empleado.meses_externos;
-    }
-    const anosCot = Math.floor(mesesCotizadosTotales / 12);
-    const mesesCot = Math.max(0, mesesCotizadosTotales % 12);
-
+    const fechaCert = datos.empleado.fecha_certificado ? datos.empleado.fecha_certificado.split('T')[0].split('-').reverse().join('-') : 'No registrado';
+    const totalCotizados = datos.empleado.total_meses_cotizados !== null ? `${datos.empleado.total_meses_cotizados} meses` : 'No registrado';
+    
     const fechaFormat = ingreso.toISOString().split('T')[0].split('-').reverse().join('-');
     
     document.getElementById('empIngreso').textContent = fechaFormat;
-    document.getElementById('empAnios').textContent = anos;
-    document.getElementById('empMeses').textContent = mesesRestantes;
-    document.getElementById('empAniosCot').textContent = datos.empleado.cumple_10_anos_base ? `${anosCot}+` : anosCot;
-    document.getElementById('empMesesCot').textContent = mesesCot;
+    document.getElementById('empFechaCert').textContent = fechaCert;
+    document.getElementById('empTotalCot').textContent = totalCotizados;
+    document.getElementById('empCotPrevio').textContent = `${mesesPrevios} meses`;
+    document.getElementById('empCotAndecorp').textContent = `${mesesAndecorp} meses`;
     
     // Años que ya tienen carga histórica registrada
     const anosRegistrados = new Set(

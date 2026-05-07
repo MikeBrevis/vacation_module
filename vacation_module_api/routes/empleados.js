@@ -30,7 +30,7 @@ router.get('/:id', async (req, res) => {
 
 router.post('/', async (req, res) => {
   try {
-    const { rut, nombre_completo, cargo, fecha_ingreso, cumple_10_anos_base, anos_externos, meses_externos } = req.body;
+    const { rut, nombre_completo, cargo, fecha_ingreso, cumple_10_anos_base, anos_externos, meses_externos, fecha_certificado, total_meses_cotizados } = req.body;
     
     if (!rut) {
       return res.status(400).json({ mensaje: 'El RUT es obligatorio.' });
@@ -50,9 +50,12 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ mensaje: 'Los meses adicionales no pueden superar 11.' });
     }
 
+    const certDate = fecha_certificado ? fecha_certificado : null;
+    const totMeses = total_meses_cotizados ? parseInt(total_meses_cotizados) : null;
+
     const [result] = await pool.query(
-      'INSERT INTO empleados (rut, nombre_completo, cargo, fecha_ingreso, cumple_10_anos_base, anos_externos, meses_externos) VALUES (?, ?, ?, ?, ?, ?, ?)',
-      [rutFormateado, nombre_completo, cargo, fecha_ingreso, cumple_10_anos_base ? 1 : 0, anosExt, mesesExt]
+      'INSERT INTO empleados (rut, nombre_completo, cargo, fecha_ingreso, cumple_10_anos_base, anos_externos, meses_externos, fecha_certificado, total_meses_cotizados) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [rutFormateado, nombre_completo, cargo, fecha_ingreso, cumple_10_anos_base ? 1 : 0, anosExt, mesesExt, certDate, totMeses]
     );
     res.status(201).json({ mensaje: 'Empleado creado', id: result.insertId });
   } catch (error) {
@@ -66,7 +69,7 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { rut, nombre_completo, cargo, fecha_ingreso, cumple_10_anos_base, anos_externos, meses_externos } = req.body;
+    const { rut, nombre_completo, cargo, fecha_ingreso, cumple_10_anos_base, anos_externos, meses_externos, fecha_certificado, total_meses_cotizados } = req.body;
     
     if (rut) {
       const rutNormalizado = normalizarRut(rut);
@@ -95,8 +98,8 @@ router.put('/:id', async (req, res) => {
     if (cumple_10_anos_base !== undefined) campos.cumple_10_anos_base = cumple_10_anos_base ? 1 : 0;
     if (anosExt !== undefined) campos.anos_externos = anosExt;
     if (mesesExt !== undefined) campos.meses_externos = mesesExt;
-
-
+    if (fecha_certificado !== undefined) campos.fecha_certificado = fecha_certificado ? fecha_certificado : null;
+    if (total_meses_cotizados !== undefined) campos.total_meses_cotizados = total_meses_cotizados !== '' && total_meses_cotizados !== null ? parseInt(total_meses_cotizados) : null;
     const keys = Object.keys(campos);
     if (keys.length === 0) return res.status(400).json({ mensaje: 'No se enviaron campos para actualizar.' });
 

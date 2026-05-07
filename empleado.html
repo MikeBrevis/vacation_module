@@ -28,26 +28,22 @@
         </div>
         <div class="border-start ps-3">
           <table class="table table-bordered text-center mb-0 bg-white" style="font-size: 0.95rem;">
-            <thead>
+            <thead class="table-light">
               <tr>
-                <th rowspan="2" class="align-middle border-bottom-0">Fecha de Ingreso</th>
-                <th colspan="2">Tiempo en la empresa</th>
-                <th colspan="2">Meses cotizados</th>
-              </tr>
-              <tr>
-                <th class="fw-normal text-muted">Años</th>
-                <th class="fw-normal text-muted">Meses</th>
-                <th class="fw-normal text-muted">Años</th>
-                <th class="fw-normal text-muted">Meses</th>
+                <th class="fw-normal text-muted border-end border-2 border-secondary">Fecha de Ingreso</th>
+                <th class="fw-normal text-muted">Emisión Cert. AFP</th>
+                <th class="fw-normal text-muted">Total Meses Cotizados</th>
+                <th class="fw-normal text-muted">Cotizados anteriores</th>
+                <th class="fw-normal text-muted">Cotizados Andecorp</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td class="align-middle"><strong id="empIngreso" class="fs-5"></strong></td>
-                <td id="empAnios" class="align-middle fs-6">0</td>
-                <td id="empMeses" class="align-middle fs-6">0</td>
-                <td id="empAniosCot" class="align-middle fs-6 fw-bold">0</td>
-                <td id="empMesesCot" class="align-middle fs-6 fw-bold">0</td>
+                <td class="align-middle border-end border-2 border-secondary"><strong id="empIngreso" class="fs-5"></strong></td>
+                <td class="align-middle"><strong id="empFechaCert" class="fs-6">N/A</strong></td>
+                <td class="align-middle"><strong id="empTotalCot" class="fs-6">N/A</strong></td>
+                <td class="align-middle"><strong id="empCotPrevio" class="fs-6">0 meses</strong></td>
+                <td class="align-middle"><strong id="empCotAndecorp" class="fs-6 text-primary">0 meses</strong></td>
               </tr>
             </tbody>
           </table>

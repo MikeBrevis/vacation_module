@@ -15,6 +15,8 @@ CREATE TABLE empleados (
     dias_progresivos_base INT DEFAULT 0,
     anos_externos INT DEFAULT 0,
     meses_externos INT DEFAULT 0,
+    fecha_certificado DATE NULL,
+    total_meses_cotizados INT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

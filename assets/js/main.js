@@ -140,7 +140,9 @@ document.getElementById('formNuevoEmpleado').addEventListener('submit', async e 
     fecha_ingreso: document.getElementById('fechaIngreso').value,
     cumple_10_anos_base: false,
     anos_externos: parseInt(document.getElementById('anosExternos').value || 0),
-    meses_externos: parseInt(document.getElementById('mesesExternos').value || 0)
+    meses_externos: parseInt(document.getElementById('mesesExternos').value || 0),
+    fecha_certificado: document.getElementById('fechaCertificado').value || null,
+    total_meses_cotizados: document.getElementById('totalMesesCotizados').value || null
   };
   try {
     await api.crearEmpleado(data);
@@ -214,7 +216,9 @@ document.getElementById('formEditarEmpleado').addEventListener('submit', async e
     fecha_ingreso: document.getElementById('editFechaIngreso').value,
     cumple_10_anos_base: false,
     anos_externos: parseInt(document.getElementById('editAnosExternos').value || 0),
-    meses_externos: parseInt(document.getElementById('editMesesExternos').value || 0)
+    meses_externos: parseInt(document.getElementById('editMesesExternos').value || 0),
+    fecha_certificado: document.getElementById('editFechaCertificado').value || null,
+    total_meses_cotizados: document.getElementById('editTotalMesesCotizados').value || null
   };
   try {
     btn.disabled = true;
