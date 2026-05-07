@@ -41,8 +41,6 @@ function renderTabla(empleados) {
             data-nombre="${emp.nombre_completo}"
             data-cargo="${emp.cargo}"
             data-fechaingreso="${emp.fecha_ingreso ? emp.fecha_ingreso.split('T')[0] : ''}"
-            data-cumple10="${emp.cumple_10_anos_base}"
-
             data-anosext="${emp.anos_externos || 0}"
             data-mesesext="${emp.meses_externos || 0}"
             title="Editar">
@@ -61,19 +59,74 @@ document.getElementById('busqueda').addEventListener('input', e => {
   });
 });
 
-// Deshabilitar campos de experiencia externa si ya acredita 10 años base
-document.getElementById('cumple10').addEventListener('change', e => {
-  const anosInput = document.getElementById('anosExternos');
-  const mesesInput = document.getElementById('mesesExternos');
-  if (e.target.checked) {
-    anosInput.disabled = true;
-    mesesInput.disabled = true;
-    anosInput.value = 0;
-    mesesInput.value = 0;
-  } else {
-    anosInput.disabled = false;
-    mesesInput.disabled = false;
+function calcularExperienciaExterna(fechaCertificado, fechaIngreso, totalMesesCotizados) {
+  if (!fechaCertificado || !fechaIngreso || !totalMesesCotizados) return null;
+  
+  const [certYear, certMonth] = fechaCertificado.split('-');
+  const [ingYear, ingMonth] = fechaIngreso.split('-');
+  
+  const mes_inicio = parseInt(ingMonth);
+  const ano_inicio = parseInt(ingYear);
+  const mes_fin = parseInt(certMonth);
+  const ano_fin = parseInt(certYear);
+  
+  const meses_con_empleador_actual = ((ano_fin - ano_inicio) * 12) + (mes_fin - mes_inicio) + 1;
+  const meses_empleador_anterior = parseInt(totalMesesCotizados) - meses_con_empleador_actual;
+  
+  if (meses_empleador_anterior < 0) {
+    throw new Error('El total de meses cotizados es menor al período con el empleador actual. Verificar datos.');
   }
+  
+  return {
+    anos: Math.floor(meses_empleador_anterior / 12),
+    meses: meses_empleador_anterior % 12,
+    meses_empleador_anterior
+  };
+}
+
+function updateCalculoFeedback(fechaCertId, fechaIngresoId, totalMesesId, resultId, anosHiddenId, mesesHiddenId) {
+  const fechaCert = document.getElementById(fechaCertId).value;
+  const fechaIngreso = document.getElementById(fechaIngresoId).value;
+  const totalMeses = document.getElementById(totalMesesId).value;
+  const resultDiv = document.getElementById(resultId);
+  
+  if (anosHiddenId && mesesHiddenId) {
+    document.getElementById(anosHiddenId).value = 0;
+    document.getElementById(mesesHiddenId).value = 0;
+  }
+  
+  if (!fechaCert || !fechaIngreso || !totalMeses) {
+    resultDiv.textContent = '';
+    return;
+  }
+  
+  try {
+    const res = calcularExperienciaExterna(fechaCert, fechaIngreso, totalMeses);
+    if (!res) return;
+    
+    resultDiv.className = 'small fw-bold text-success mb-2';
+    resultDiv.textContent = `La trabajadora registra ${res.meses_empleador_anterior} meses cotizados con empleadores anteriores, equivalentes a ${res.anos} años y ${res.meses} meses, previos a su ingreso.`;
+    
+    if (anosHiddenId && mesesHiddenId) {
+      document.getElementById(anosHiddenId).value = res.anos;
+      document.getElementById(mesesHiddenId).value = res.meses;
+    }
+  } catch (err) {
+    resultDiv.className = 'small fw-bold text-danger mb-2';
+    resultDiv.textContent = err.message;
+  }
+}
+
+['fechaCertificado', 'fechaIngreso', 'totalMesesCotizados'].forEach(id => {
+  document.getElementById(id)?.addEventListener('input', () => {
+    updateCalculoFeedback('fechaCertificado', 'fechaIngreso', 'totalMesesCotizados', 'resultadoCalculoNuevo', 'anosExternos', 'mesesExternos');
+  });
+});
+
+['editFechaCertificado', 'editFechaIngreso', 'editTotalMesesCotizados'].forEach(id => {
+  document.getElementById(id)?.addEventListener('input', () => {
+    updateCalculoFeedback('editFechaCertificado', 'editFechaIngreso', 'editTotalMesesCotizados', 'resultadoCalculoEdit', 'editAnosExternos', 'editMesesExternos');
+  });
 });
 
 document.getElementById('formNuevoEmpleado').addEventListener('submit', async e => {
@@ -85,7 +138,7 @@ document.getElementById('formNuevoEmpleado').addEventListener('submit', async e 
     nombre_completo: document.getElementById('nombre').value,
     cargo: document.getElementById('cargo').value,
     fecha_ingreso: document.getElementById('fechaIngreso').value,
-    cumple_10_anos_base: document.getElementById('cumple10').checked,
+    cumple_10_anos_base: false,
     anos_externos: parseInt(document.getElementById('anosExternos').value || 0),
     meses_externos: parseInt(document.getElementById('mesesExternos').value || 0)
   };
@@ -134,36 +187,17 @@ document.querySelector('#tablaEmpleados').addEventListener('click', e => {
     document.getElementById('editCargo').value = btn.dataset.cargo;
     document.getElementById('editFechaIngreso').value = btn.dataset.fechaingreso || '';
 
-    const cumple10 = btn.dataset.cumple10 === '1' || btn.dataset.cumple10 === 'true';
-    document.getElementById('editCumple10').checked = cumple10;
-
-
-
-    const editAnos = document.getElementById('editAnosExternos');
-    const editMeses = document.getElementById('editMesesExternos');
-    editAnos.value = btn.dataset.anosext;
-    editMeses.value = btn.dataset.mesesext;
-    editAnos.disabled = cumple10;
-    editMeses.disabled = cumple10;
+    document.getElementById('editAnosExternos').value = btn.dataset.anosext;
+    document.getElementById('editMesesExternos').value = btn.dataset.mesesext;
+    document.getElementById('editFechaCertificado').value = '';
+    document.getElementById('editTotalMesesCotizados').value = '';
+    
+    // Show current experience registered
+    const resultDiv = document.getElementById('resultadoCalculoEdit');
+    resultDiv.className = 'small fw-bold text-muted mb-2';
+    resultDiv.textContent = `Experiencia registrada actual: ${btn.dataset.anosext} años y ${btn.dataset.mesesext} meses previos. Ingrese certificado para actualizar.`;
 
     if (modalEditarInstancia) modalEditarInstancia.show();
-  }
-});
-
-document.getElementById('editCumple10').addEventListener('change', e => {
-  const editAnos = document.getElementById('editAnosExternos');
-  const editMeses = document.getElementById('editMesesExternos');
-
-  if (e.target.checked) {
-    editAnos.disabled = true;
-    editMeses.disabled = true;
-    editAnos.value = 0;
-    editMeses.value = 0;
-
-  } else {
-    editAnos.disabled = false;
-    editMeses.disabled = false;
-
   }
 });
 
@@ -178,8 +212,7 @@ document.getElementById('formEditarEmpleado').addEventListener('submit', async e
     nombre_completo: document.getElementById('editNombre').value,
     cargo: document.getElementById('editCargo').value,
     fecha_ingreso: document.getElementById('editFechaIngreso').value,
-    cumple_10_anos_base: document.getElementById('editCumple10').checked,
-
+    cumple_10_anos_base: false,
     anos_externos: parseInt(document.getElementById('editAnosExternos').value || 0),
     meses_externos: parseInt(document.getElementById('editMesesExternos').value || 0)
   };

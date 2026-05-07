@@ -79,21 +79,19 @@
             <hr class="my-3">
             <p class="text-muted small mb-2">Experiencia laboral previa (certificado AFP)</p>
 
-            <div class="form-check mb-3">
-              <input class="form-check-input" type="checkbox" id="cumple10">
-              <label class="form-check-label" for="cumple10">Acredita 10 años de cotizaciones base</label>
-            </div>
-
             <div class="row mb-2">
               <div class="col-6">
-                <label class="form-label">Años en empresas anteriores</label>
-                <input type="number" id="anosExternos" class="form-control" value="0" min="0" max="9">
+                <label class="form-label">Fecha de Emisión del Cert.</label>
+                <input type="date" id="fechaCertificado" class="form-control">
               </div>
               <div class="col-6">
-                <label class="form-label">Meses adicionales</label>
-                <input type="number" id="mesesExternos" class="form-control" value="0" min="0" max="11">
+                <label class="form-label">Total Meses Cotizados</label>
+                <input type="number" id="totalMesesCotizados" class="form-control" min="0">
               </div>
             </div>
+            <div id="resultadoCalculoNuevo" class="small fw-bold text-primary mb-2"></div>
+            <input type="hidden" id="anosExternos" value="0">
+            <input type="hidden" id="mesesExternos" value="0">
           </div>
           <div class="modal-footer">
             <button type="submit" class="btn btn-primary">Guardar</button>
@@ -136,23 +134,20 @@
             <hr class="my-3">
             <p class="text-muted small mb-2">Experiencia laboral previa (certificado AFP)</p>
 
-            <div class="form-check mb-3">
-              <input class="form-check-input" type="checkbox" id="editCumple10">
-              <label class="form-check-label" for="editCumple10">Acredita 10 años de cotizaciones base</label>
-            </div>
-
-
-
             <div class="row mb-2">
               <div class="col-6">
-                <label class="form-label">Años en empresas anteriores</label>
-                <input type="number" id="editAnosExternos" class="form-control" value="0" min="0" max="9">
+                <label class="form-label">Fecha de Emisión del Cert.</label>
+                <input type="date" id="editFechaCertificado" class="form-control">
               </div>
               <div class="col-6">
-                <label class="form-label">Meses adicionales</label>
-                <input type="number" id="editMesesExternos" class="form-control" value="0" min="0" max="11">
+                <label class="form-label">Total Meses Cotizados</label>
+                <input type="number" id="editTotalMesesCotizados" class="form-control" min="0">
               </div>
             </div>
+            <div id="resultadoCalculoEdit" class="small fw-bold text-primary mb-2"></div>
+            
+            <input type="hidden" id="editAnosExternos">
+            <input type="hidden" id="editMesesExternos">
 
             <hr>
 
