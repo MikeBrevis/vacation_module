@@ -97,6 +97,7 @@ function renderPanelSaldos(saldo) {
   document.getElementById('saldoActual').className = `text-${color} fw-bold display-4`;
   
   document.getElementById('saldoLegales').textContent = saldo.diasLegalesAcumulados;
+  document.getElementById('saldoProgresivosAcumulados').textContent = saldo.diasProgresivosTotal;
   document.getElementById('saldoProgresivos').textContent = saldo.diasProgresivosAnuales;
   document.getElementById('saldoConsumidos').textContent = saldo.diasConsumidos;
 }
@@ -137,6 +138,8 @@ function renderHistorial(solicitudes) {
     if (fecha_inicio.endsWith('-01-01') && fecha_fin.endsWith('-12-31')) {
       tdInicio = `<td colspan="2" class="text-center text-muted fw-bold">Año ${anio} (Histórico)</td>`;
       tdTermino = ``;
+    } else if (s.es_progresivo) {
+      tdInicio = `<td>${fecha_inicio} <span class="badge bg-primary ms-1">Progresivo</span></td>`;
     }
     
     tbody.innerHTML += `
@@ -160,8 +163,9 @@ document.getElementById('formSolicitud').addEventListener('submit', async e => {
   e.preventDefault();
   const fechaInicio = document.getElementById('fechaInicio').value;
   const fechaFin = document.getElementById('fechaFin').value;
+  const esProgresivo = document.getElementById('esProgresiva').checked;
   try {
-    await api.registrarSolicitud({ empleado_id: id, fecha_inicio: fechaInicio, fecha_fin: fechaFin });
+    await api.registrarSolicitud({ empleado_id: id, fecha_inicio: fechaInicio, fecha_fin: fechaFin, es_progresivo: esProgresivo });
     window.location.reload();
   } catch (err) {
     const container = document.getElementById('alertaSolicitud');

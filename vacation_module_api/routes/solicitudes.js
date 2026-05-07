@@ -6,8 +6,8 @@ const { generarPDF } = require('../services/pdfService');
 
 router.post('/', async (req, res) => {
   try {
-    const { empleado_id, fecha_inicio, fecha_fin } = req.body;
-    const { insertId } = await validarYCrearSolicitud(empleado_id, fecha_inicio, fecha_fin);
+    const { empleado_id, fecha_inicio, fecha_fin, es_progresivo } = req.body;
+    const { insertId } = await validarYCrearSolicitud(empleado_id, fecha_inicio, fecha_fin, es_progresivo);
     res.status(201).json({ mensaje: 'Solicitud creada', solicitud_id: insertId });
   } catch (error) { res.status(422).json({ mensaje: error.message }); }
 });
@@ -56,6 +56,7 @@ router.get('/:id/pdf', async (req, res) => {
       dias_progresivos: saldo.diasProgresivosAnuales,
       dias_pendientes: saldo.saldoActual,
       es_historico,
+      es_progresivo: solicitud.es_progresivo,
       anio
     };
 

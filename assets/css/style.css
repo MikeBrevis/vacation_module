@@ -1,8 +1,3 @@
-/* ============================================================
-   AndeCorp – Vacation Module  |  assets/css/style.css
-   Design tokens follow the ande_design skill specification.
-   ============================================================ */
-
 /* --- CSS Variables (brand tokens) -------------------------- */
 :root {
   --blue: #14213D;
@@ -37,7 +32,6 @@ body {
 }
 
 .header-title {
-  font-family: 'Anton', sans-serif;
   font-size: 1.75rem;
   color: var(--yellow);
   margin: 0;
@@ -127,7 +121,6 @@ body {
 }
 
 #tablaEmpleados thead th {
-  font-family: sans-serif;
   color: var(--gray);
   font-weight: 700;
   text-transform: uppercase;
@@ -236,7 +229,6 @@ body {
 }
 
 .modal-title {
-  font-family: 'Anton', sans-serif;
   letter-spacing: 0.06em;
 }
 

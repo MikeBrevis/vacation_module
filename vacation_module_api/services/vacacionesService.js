@@ -67,20 +67,8 @@ async function calcularSaldo(empleadoId) {
     const anosPostBase = Math.floor(mesesPostBase / 12);
     progresivosEmpresa = Math.floor(anosPostBase / 3);
   }
-  // Calcular dias progresivos historicos acumulados
-  let diasProgresivosAcumulados = 0;
-  const anosPostBaseTotales = Math.floor(mesesPostBase / 12);
-  for (let y = 1; y <= anosPostBaseTotales; y++) {
-    diasProgresivosAcumulados += Math.floor(y / 3);
-  }
-
-  const diasLegalesAcumulados = parseFloat((mesesEnEmpresa * 1.25).toFixed(4));
-  const diasProgresivosTotal = diasProgresivosAcumulados;
-  const diasProgresivosAnuales = progresivosEmpresa;
-  const consumido = parseFloat(total_consumido);
-  const saldoActual = Math.floor(diasLegalesAcumulados + diasProgresivosTotal - consumido);
-
   const detalleAnual = [];
+  let diasProgresivosAcumulados = 0;
   for (let i = 1; i <= anosEnEmpresa; i++) {
     let mesesParaBaseCalculo = 0;
     if (!tieneBaseDiezAnos) {
@@ -90,6 +78,8 @@ async function calcularSaldo(empleadoId) {
     const anosPostBaseEnAniversario = Math.floor(mesesPostBaseEnAniversario / 12);
     const progr = Math.floor(anosPostBaseEnAniversario / 3);
     
+    diasProgresivosAcumulados += progr;
+
     detalleAnual.push({
       periodo: `${ingreso.getFullYear() + i - 1} - ${ingreso.getFullYear() + i}`,
       base: 15,
@@ -97,7 +87,7 @@ async function calcularSaldo(empleadoId) {
       total: 15 + progr
     });
   }
-  
+
   const mesesProporcionales = mesesEnEmpresa % 12;
   if (mesesProporcionales > 0 || anosEnEmpresa === 0) {
     detalleAnual.push({
@@ -107,6 +97,12 @@ async function calcularSaldo(empleadoId) {
       total: parseFloat((mesesProporcionales * 1.25).toFixed(2))
     });
   }
+
+  const diasLegalesAcumulados = parseFloat((mesesEnEmpresa * 1.25).toFixed(4));
+  const diasProgresivosTotal = diasProgresivosAcumulados;
+  const diasProgresivosAnuales = progresivosEmpresa;
+  const consumido = parseFloat(total_consumido);
+  const saldoActual = Math.floor(diasLegalesAcumulados + diasProgresivosTotal - consumido);
 
   return {
     diasLegalesAcumulados,
@@ -125,7 +121,7 @@ async function calcularSaldo(empleadoId) {
 }
 
 // Lógica de validaciones para POST /api/solicitudes (6 pasos)
-async function validarYCrearSolicitud(empleado_id, fecha_inicio, fecha_fin) {
+async function validarYCrearSolicitud(empleado_id, fecha_inicio, fecha_fin, es_progresivo = false) {
   if (new Date(fecha_inicio) > new Date(fecha_fin)) {
     throw new Error('Fecha de inicio posterior a fecha de fin');
   }
@@ -145,8 +141,8 @@ async function validarYCrearSolicitud(empleado_id, fecha_inicio, fecha_fin) {
   }
 
   const [result] = await pool.query(
-    'INSERT INTO solicitudes_vacaciones (empleado_id, fecha_inicio, fecha_fin, dias_habiles_consumidos) VALUES (?, ?, ?, ?)',
-    [empleado_id, fecha_inicio, fecha_fin, dias_habiles]
+    'INSERT INTO solicitudes_vacaciones (empleado_id, fecha_inicio, fecha_fin, dias_habiles_consumidos, es_progresivo) VALUES (?, ?, ?, ?, ?)',
+    [empleado_id, fecha_inicio, fecha_fin, dias_habiles, es_progresivo]
   );
 
   return { insertId: result.insertId, dias_habiles, saldos_previos: saldos };

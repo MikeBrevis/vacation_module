@@ -17,9 +17,10 @@ function generarPDF(datos, responseStream) {
     let y = 50;
     const width = 512;
 
-    // COMPROBANTE DE FERIADO LEGAL
+    // COMPROBANTE DE FERIADO LEGAL O PROGRESIVO
+    const titulo = datos.es_progresivo ? 'COMPROBANTE DE FERIADO PROGRESIVO' : 'COMPROBANTE DE FERIADO LEGAL';
     doc.font('Helvetica-Bold').fontSize(16)
-       .text('COMPROBANTE DE FERIADO LEGAL', x, y + 25, { align: 'center', width: width });
+       .text(titulo, x, y + 25, { align: 'center', width: width });
 
     const logoPath = path.join(__dirname, '../../logo.png');
     if (fs.existsSync(logoPath)) {
@@ -69,7 +70,8 @@ function generarPDF(datos, responseStream) {
     // Sección 2: Declaración y Fechas
     doc.font('Helvetica').text('En cumplimiento de las disposiciones legales vigentes, se deja constancia que el trabajador', leftCol, y);
     y += 15;
-    doc.text('hará uso de feriado legal con remuneración.', leftCol, y);
+    const usoDe = datos.es_progresivo ? 'hará uso de feriado progresivo con remuneración.' : 'hará uso de feriado legal con remuneración.';
+    doc.text(usoDe, leftCol, y);
 
     y += 30;
     
