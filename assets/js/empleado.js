@@ -134,20 +134,23 @@ function renderHistorial(solicitudes) {
     
     let tdInicio = `<td>${fecha_inicio}</td>`;
     let tdTermino = `<td>${fecha_fin}</td>`;
+    let tdProgresivo = `<td></td>`;
     
     if (fecha_inicio.endsWith('-01-01') && fecha_fin.endsWith('-12-31')) {
-      tdInicio = `<td colspan="2" class="text-center text-muted fw-bold">Año ${anio} (Histórico)</td>`;
-      tdTermino = ``;
+      tdInicio = `<td class="text-muted fw-bold">Año ${anio}</td>`;
+      tdTermino = `<td class="text-muted fw-bold">(Histórico)</td>`;
+      tdProgresivo = `<td></td>`;
     } else if (s.es_progresivo) {
-      tdInicio = `<td>${fecha_inicio} <span class="badge bg-primary ms-1">Progresivo</span></td>`;
+      tdProgresivo = `<td><i class="bi bi-check-circle-fill text-success fs-5"></i></td>`;
     }
     
     tbody.innerHTML += `
-      <tr>
+      <tr class="align-middle">
         <td>${fechaSol}</td>
         ${tdInicio}
         ${tdTermino}
         <td>${s.dias_habiles_consumidos}</td>
+        ${tdProgresivo}
         <td>
           <a href="${pdfUrl}" target="_blank" class="btn btn-sm btn-outline-primary">Ver PDF</a>
         </td>
