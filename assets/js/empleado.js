@@ -174,11 +174,11 @@ function renderDetalleAnual(detalle) {
 
     let rowClass = '';
     if (d.es_periodo_base) {
-      rowClass = 'table-success fw-bold'; // Prioridad para destacar el hito de 10 años
-    } else if (isAgotado) {
-      rowClass = 'table-danger text-muted';
-    } else if (isProgresivo) {
-      rowClass = 'table-success fw-bold';
+      rowClass = 'table-primary fw-bold'; // Hito 10 años: AZUL
+    } else if (d.disponibles > 0) {
+      rowClass = 'table-success';         // Disponible: VERDE
+    } else {
+      rowClass = 'table-danger text-muted'; // Agotado: ROJO
     }
 
     const spanProgresivo = isProgresivo ? `<span class="badge bg-primary text-white ms-1">+${d.progresivos}</span>` : '0';
