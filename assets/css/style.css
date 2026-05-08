@@ -154,43 +154,6 @@ body {
   font-size: 0.85rem;
 }
 
-/* Name cell with avatar */
-.name-cell {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.65rem;
-}
-
-/* Avatar circle */
-.avatar {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: var(--white);
-  flex-shrink: 0;
-  text-transform: uppercase;
-}
-
-/* Deterministic avatar colors using nth-child */
-.avatar-blue {
-  background-color: var(--blue);
-}
-
-.avatar-yellow {
-  background-color: var(--yellow);
-  color: var(--blue);
-}
-
-.avatar-gray {
-  background-color: var(--gray)
-}
-
 /* Action icons */
 .action-btn {
   background: none;

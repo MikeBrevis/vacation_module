@@ -7,30 +7,18 @@ async function cargarTabla() {
   } catch (err) { alert('Error: ' + err.message); }
 }
 
-// Avatar color palette – cycles through 3 brand-friendly hues
-const AVATAR_COLORS = ['avatar-blue', 'avatar-yellow', 'avatar-gray'];
-
-function getInitials(name) {
-  return name.split(' ').slice(0, 2).map(w => w[0]).join('').toUpperCase();
-}
-
 function renderTabla(empleados) {
   const tbody = document.querySelector('#tablaEmpleados tbody');
   tbody.innerHTML = '';
   empleados.forEach((emp, idx) => {
-    const avatarClass = AVATAR_COLORS[idx % AVATAR_COLORS.length];
-    const initials = getInitials(emp.nombre_completo);
     tbody.innerHTML += `
       <tr>
         <td class="td-rut">${emp.rut}</td>
         <td>
-          <div class="name-cell">
-            <span class="avatar ${avatarClass}">${initials}</span>
-            <strong>${emp.nombre_completo}</strong>
-          </div>
+          <strong>${emp.nombre_completo}</strong>
         </td>
         <td>${emp.cargo}</td>
-        <td class="td-saldo">${parseFloat(emp.saldoActual).toFixed(2)}</td>
+        <td class="td-saldo">${Math.floor(emp.saldoActual)}</td>
         <td class="text-center">
           <a href="empleado.html?id=${emp.id}" class="action-btn" title="Ver Detalle">
             <i class="bi bi-eye"></i>
@@ -117,6 +105,32 @@ function updateCalculoFeedback(fechaCertId, fechaIngresoId, totalMesesId, result
   }
 }
 
+// --- UX Validations Real-time ---
+const filterNoNumbers = (e) => { e.target.value = e.target.value.replace(/[0-9]/g, ''); };
+const filterRut = (e) => {
+  let val = e.target.value.replace(/[^0-9kK.-]/g, '');
+  // If there are letters k/K, ensure they are only at the end
+  if (/[kK]/.test(val)) {
+    const lastChar = val.slice(-1);
+    if (!/[kK]/.test(lastChar)) {
+      val = val.replace(/[kK]/g, ''); // Remove if not at end
+    } else {
+      // If last char is k/K, remove any other k/K that might have been pasted in the middle
+      const body = val.slice(0, -1).replace(/[kK]/g, '');
+      val = body + lastChar;
+    }
+  }
+  e.target.value = val;
+};
+
+['nombre', 'editNombre', 'cargo', 'editCargo'].forEach(id => {
+  document.getElementById(id)?.addEventListener('input', filterNoNumbers);
+});
+
+['rut', 'editRut'].forEach(id => {
+  document.getElementById(id)?.addEventListener('input', filterRut);
+});
+
 ['fechaCertificado', 'fechaIngreso', 'totalMesesCotizados'].forEach(id => {
   document.getElementById(id)?.addEventListener('input', () => {
     updateCalculoFeedback('fechaCertificado', 'fechaIngreso', 'totalMesesCotizados', 'resultadoCalculoNuevo', 'anosExternos', 'mesesExternos');
@@ -133,10 +147,20 @@ document.getElementById('formNuevoEmpleado').addEventListener('submit', async e 
   e.preventDefault();
   const alertaContainer = document.getElementById('alertaNuevoEmpleado');
   alertaContainer.innerHTML = '';
+  const rut = document.getElementById('rut').value.trim();
+  const nombre = document.getElementById('nombre').value.trim();
+  const cargo = document.getElementById('cargo').value.trim();
+
+  // Validate Name (min 2 words)
+  if (nombre.split(/\s+/).filter(w => w.length > 0).length < 2) {
+    alertaContainer.innerHTML = `<div class="alert alert-danger">El nombre debe incluir al menos un nombre y un apellido.</div>`;
+    return;
+  }
+
   const data = {
-    rut: document.getElementById('rut').value,
-    nombre_completo: document.getElementById('nombre').value,
-    cargo: document.getElementById('cargo').value,
+    rut,
+    nombre_completo: nombre,
+    cargo: cargo,
     fecha_ingreso: document.getElementById('fechaIngreso').value,
     cumple_10_anos_base: false,
     anos_externos: parseInt(document.getElementById('anosExternos').value || 0),
@@ -209,10 +233,20 @@ document.getElementById('formEditarEmpleado').addEventListener('submit', async e
   alertaContainer.innerHTML = '';
   const empId = document.getElementById('editarEmpleadoId').value;
   const btn = document.getElementById('btnGuardarEdicion');
+  const rut = document.getElementById('editRut').value.trim();
+  const nombre = document.getElementById('editNombre').value.trim();
+  const cargo = document.getElementById('editCargo').value.trim();
+
+  // Validate Name (min 2 words)
+  if (nombre.split(/\s+/).filter(w => w.length > 0).length < 2) {
+    alertaContainer.innerHTML = `<div class="alert alert-danger">El nombre debe incluir al menos un nombre y un apellido.</div>`;
+    return;
+  }
+
   const data = {
-    rut: document.getElementById('editRut').value,
-    nombre_completo: document.getElementById('editNombre').value,
-    cargo: document.getElementById('editCargo').value,
+    rut,
+    nombre_completo: nombre,
+    cargo: cargo,
     fecha_ingreso: document.getElementById('editFechaIngreso').value,
     cumple_10_anos_base: false,
     anos_externos: parseInt(document.getElementById('editAnosExternos').value || 0),
