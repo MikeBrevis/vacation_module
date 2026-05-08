@@ -87,6 +87,8 @@ async function calcularSaldo(empleadoId) {
   }
   const detalleAnual = [];
   let diasProgresivosAcumulados = 0;
+  let baseYaAlcanzada = tieneBaseDiezAnos || (mesesTotalExternos >= 120);
+  
   for (let i = 1; i <= anosEnEmpresa; i++) {
     let mesesParaBaseCalculo = 0;
     if (!tieneBaseDiezAnos) {
@@ -103,6 +105,14 @@ async function calcularSaldo(empleadoId) {
     const consProg = consumidosProgPorPeriodo[startYear] || 0;
     const consTotal = consBase + consProg;
     
+    // Identificar si en este periodo se cumple la base de 10 años
+    let esPeriodoBase = false;
+    const mesesTotalesAlFinal = (i * 12) + mesesTotalExternos;
+    if (!baseYaAlcanzada && mesesTotalesAlFinal >= 120) {
+      esPeriodoBase = true;
+      baseYaAlcanzada = true;
+    }
+
     detalleAnual.push({
       startYear,
       periodo: `${startYear} - ${startYear + 1}`,
@@ -114,7 +124,8 @@ async function calcularSaldo(empleadoId) {
       consumidos_prog: consProg,
       disponibles: (15 + progr) - consTotal,
       disponibles_base: 15 - consBase,
-      disponibles_prog: progr - consProg
+      disponibles_prog: progr - consProg,
+      es_periodo_base: esPeriodoBase
     });
   }
 
@@ -126,6 +137,13 @@ async function calcularSaldo(empleadoId) {
     const consTotal = consBase + consProg;
     const tot = parseFloat((mesesProporcionales * 1.25).toFixed(2));
     
+    let esPeriodoBase = false;
+    const mesesTotalesAhora = mesesEnEmpresa + mesesTotalExternos;
+    if (!baseYaAlcanzada && mesesTotalesAhora >= 120) {
+      esPeriodoBase = true;
+      baseYaAlcanzada = true;
+    }
+
     detalleAnual.push({
       startYear,
       periodo: `${startYear} - Actual`,
@@ -137,7 +155,8 @@ async function calcularSaldo(empleadoId) {
       consumidos_prog: consProg,
       disponibles: tot - consTotal,
       disponibles_base: tot - consBase,
-      disponibles_prog: 0 - consProg
+      disponibles_prog: 0 - consProg,
+      es_periodo_base: esPeriodoBase
     });
   }
 

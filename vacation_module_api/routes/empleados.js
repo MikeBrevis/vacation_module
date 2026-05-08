@@ -43,19 +43,20 @@ router.post('/', async (req, res) => {
 
     const anosExt = parseInt(anos_externos) || 0;
     const mesesExt = parseInt(meses_externos) || 0;
-    if (anosExt >= 10) {
-      return res.status(400).json({ mensaje: 'Si tiene 10 o más años, marque la casilla "Acredita 10 años de cotizaciones base".' });
-    }
+    
     if (mesesExt > 11) {
       return res.status(400).json({ mensaje: 'Los meses adicionales no pueden superar 11.' });
     }
 
-    const certDate = fecha_certificado ? fecha_certificado : null;
     const totMeses = total_meses_cotizados ? parseInt(total_meses_cotizados) : null;
+    // La base de 10 años solo se marca automáticamente si los años EXTERNOS (previos al ingreso) son >= 10
+    const cumpleDiez = cumple_10_anos_base || anosExt >= 10;
+
+    const certDate = fecha_certificado ? fecha_certificado : null;
 
     const [result] = await pool.query(
       'INSERT INTO empleados (rut, nombre_completo, cargo, fecha_ingreso, cumple_10_anos_base, anos_externos, meses_externos, fecha_certificado, total_meses_cotizados) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [rutFormateado, nombre_completo, cargo, fecha_ingreso, cumple_10_anos_base ? 1 : 0, anosExt, mesesExt, certDate, totMeses]
+      [rutFormateado, nombre_completo, cargo, fecha_ingreso, cumpleDiez ? 1 : 0, anosExt, mesesExt, certDate, totMeses]
     );
     res.status(201).json({ mensaje: 'Empleado creado', id: result.insertId });
   } catch (error) {
@@ -82,9 +83,6 @@ router.put('/:id', async (req, res) => {
     const anosExt = anos_externos !== undefined ? parseInt(anos_externos) || 0 : undefined;
     const mesesExt = meses_externos !== undefined ? parseInt(meses_externos) || 0 : undefined;
 
-    if (anosExt !== undefined && anosExt >= 10) {
-      return res.status(400).json({ mensaje: 'Si tiene 10 o más años, marque la casilla "Acredita 10 años de cotizaciones base".' });
-    }
     if (mesesExt !== undefined && mesesExt > 11) {
       return res.status(400).json({ mensaje: 'Los meses adicionales no pueden superar 11.' });
     }
@@ -95,7 +93,12 @@ router.put('/:id', async (req, res) => {
     if (nombre_completo) campos.nombre_completo = nombre_completo;
     if (cargo) campos.cargo = cargo;
     if (fecha_ingreso) campos.fecha_ingreso = fecha_ingreso;
-    if (cumple_10_anos_base !== undefined) campos.cumple_10_anos_base = cumple_10_anos_base ? 1 : 0;
+    
+    // Auto-detección de base de 10 años en actualización basada solo en años previos (externos)
+    let finalCumpleDiez = cumple_10_anos_base;
+    if (anosExt !== undefined && anosExt >= 10) finalCumpleDiez = true;
+
+    if (finalCumpleDiez !== undefined) campos.cumple_10_anos_base = finalCumpleDiez ? 1 : 0;
     if (anosExt !== undefined) campos.anos_externos = anosExt;
     if (mesesExt !== undefined) campos.meses_externos = mesesExt;
     if (fecha_certificado !== undefined) campos.fecha_certificado = fecha_certificado ? fecha_certificado : null;

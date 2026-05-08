@@ -99,15 +99,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       const endStr = document.getElementById('fechaFin').value;
       const box = document.getElementById('infoDiasBox');
       const val = document.getElementById('infoDiasVal');
-      
+
       if (!startStr || !endStr) {
         box.classList.add('d-none');
         return;
       }
-      
+
       const start = new Date(startStr + 'T00:00:00');
       const end = new Date(endStr + 'T00:00:00');
-      
+
       if (start > end) {
         box.classList.add('d-none');
         return;
@@ -123,7 +123,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         cur.setDate(cur.getDate() + 1);
       }
-      
+
       val.textContent = count;
       box.classList.remove('d-none');
     }
@@ -171,22 +171,26 @@ function renderDetalleAnual(detalle) {
   detalle.forEach(d => {
     const isProgresivo = d.progresivos > 0;
     const isAgotado = d.disponibles == 0;
-    
+
     let rowClass = '';
-    if (isAgotado) {
+    if (d.es_periodo_base) {
+      rowClass = 'table-success fw-bold'; // Prioridad para destacar el hito de 10 años
+    } else if (isAgotado) {
       rowClass = 'table-danger text-muted';
     } else if (isProgresivo) {
       rowClass = 'table-success fw-bold';
     }
 
     const spanProgresivo = isProgresivo ? `<span class="badge bg-primary text-white ms-1">+${d.progresivos}</span>` : '0';
+    
     tbody.innerHTML += `
-      <tr class="${rowClass}">
+      <tr class="${rowClass}" ${d.es_periodo_base ? 'title="Base de 10 años cumplida"' : ''}>
         <td>${d.periodo}</td>
         <td>${d.base}</td>
         <td>${spanProgresivo}</td>
         <td>${d.total}</td>
-        <td>${d.consumidos}</td>
+        <td>${d.consumidos_base}</td>
+        <td>${d.consumidos_prog}</td>
         <td>${d.disponibles}</td>
       </tr>
     `;

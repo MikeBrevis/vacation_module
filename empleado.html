@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8">
   <title>Detalle de Empleado - AndeCorp</title>
@@ -16,10 +17,11 @@
     }
   </style>
 </head>
+
 <body>
   <div class="container mt-3">
     <a href="index.html" class="btn btn-secondary mb-3">&larr; Volver</a>
-    
+
     <div class="card mb-4 shadow-sm">
       <div class="card-body d-flex justify-content-between align-items-center">
         <div class="ps-5">
@@ -39,7 +41,8 @@
             </thead>
             <tbody>
               <tr>
-                <td class="align-middle border-end border-2 border-secondary"><strong id="empIngreso" class="fs-5"></strong></td>
+                <td class="align-middle border-end border-2 border-secondary"><strong id="empIngreso"
+                    class="fs-5"></strong></td>
                 <td class="align-middle"><strong id="empFechaCert" class="fs-6">N/A</strong></td>
                 <td class="align-middle"><strong id="empTotalCot" class="fs-6">N/A</strong></td>
                 <td class="align-middle"><strong id="empCotPrevio" class="fs-6">0 meses</strong></td>
@@ -54,11 +57,13 @@
     <div class="accordion mb-3 shadow-sm" id="accordionDetalle">
       <div class="accordion-item">
         <h2 class="accordion-header" id="headingDetalle">
-          <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDetalle" aria-expanded="false" aria-controls="collapseDetalle">
+          <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse"
+            data-bs-target="#collapseDetalle" aria-expanded="false" aria-controls="collapseDetalle">
             Detalle de Días de Vacaciones por Año
           </button>
         </h2>
-        <div id="collapseDetalle" class="accordion-collapse collapse" aria-labelledby="headingDetalle" data-bs-parent="#accordionDetalle">
+        <div id="collapseDetalle" class="accordion-collapse collapse" aria-labelledby="headingDetalle"
+          data-bs-parent="#accordionDetalle">
           <div class="accordion-body p-0">
             <table class="table table-hover mb-0 text-center align-middle" style="font-size: 0.95rem;">
               <thead class="table-light">
@@ -67,7 +72,8 @@
                   <th>Días Base</th>
                   <th>Días Progresivos</th>
                   <th>Total Ganado</th>
-                  <th>Consumidos</th>
+                  <th>Cons. Base</th>
+                  <th>Cons. Prog.</th>
                   <th>Disponibles</th>
                 </tr>
               </thead>
@@ -137,7 +143,8 @@
               </div>
               <div class="mb-3">
                 <label>Fecha de Inicio</label>
-                <input type="text" id="fechaInicio" class="form-control bg-white" placeholder="Seleccione fecha" required>
+                <input type="text" id="fechaInicio" class="form-control bg-white" placeholder="Seleccione fecha"
+                  required>
               </div>
               <div class="mb-3">
                 <label>Fecha de Fin</label>
@@ -177,7 +184,7 @@
           </div>
         </div>
       </div>
-      
+
       <div class="col-md-8">
         <div class="card shadow-sm">
           <div class="card-header bg-dark text-white">Historial de Solicitudes</div>
@@ -211,7 +218,8 @@
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <p>¿Está seguro de que desea anular esta solicitud de vacaciones? Esta acción devolverá los días al saldo del empleado y no se puede deshacer.</p>
+          <p>¿Está seguro de que desea anular esta solicitud de vacaciones? Esta acción devolverá los días al saldo del
+            empleado y no se puede deshacer.</p>
           <input type="hidden" id="anularSolicitudId">
         </div>
         <div class="modal-footer">
@@ -228,4 +236,5 @@
   <script src="assets/js/api.js"></script>
   <script src="assets/js/empleado.js"></script>
 </body>
+
 </html>
