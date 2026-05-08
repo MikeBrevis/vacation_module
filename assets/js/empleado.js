@@ -14,10 +14,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     const mesesAndecorp = (hoy.getFullYear() - ingreso.getFullYear()) * 12 + (hoy.getMonth() - ingreso.getMonth());
     const mesesPrevios = (datos.empleado.anos_externos * 12) + datos.empleado.meses_externos;
 
-    const fechaCert = datos.empleado.fecha_certificado ? datos.empleado.fecha_certificado.split('T')[0].split('-').reverse().join('-') : 'No registrado';
-    const totalCotizados = datos.empleado.total_meses_cotizados !== null ? `${datos.empleado.total_meses_cotizados} meses` : 'No registrado';
+    const formatFecha = (f) => {
+      if (!f) return null;
+      const d = typeof f === 'string' ? f.split('T')[0] : f.toISOString().split('T')[0];
+      return d.split('-').reverse().join('-');
+    };
 
-    const fechaFormat = ingreso.toISOString().split('T')[0].split('-').reverse().join('-');
+    const fechaCert = datos.empleado.fecha_certificado ? formatFecha(datos.empleado.fecha_certificado) : 'No registrado';
+    const totalCotizados = (datos.empleado.total_meses_cotizados !== null && datos.empleado.total_meses_cotizados !== undefined) ? `${datos.empleado.total_meses_cotizados} meses` : 'No registrado';
+    const fechaFormat = formatFecha(datos.empleado.fecha_ingreso);
 
     document.getElementById('empIngreso').textContent = fechaFormat;
     document.getElementById('empFechaCert').textContent = fechaCert;
@@ -34,7 +39,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Poblar el selector de años históricos (desde su ingreso hasta el año actual)
     const selectAnio = document.getElementById('histAnio');
-    selectAnio.innerHTML = '<option value="">Seleccione un periodo...</option>';
+    selectAnio.innerHTML = '<option value="" disabled selected hidden></option>';
     for (let y = hoy.getFullYear() - 1; y >= ingreso.getFullYear(); y--) {
       const option = document.createElement('option');
       option.value = y;
@@ -49,7 +54,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Poblar el selector de periodos disponibles para nueva solicitud
     const selectSolPeriodo = document.getElementById('solPeriodo');
-    selectSolPeriodo.innerHTML = '<option value="">Seleccione un periodo disponible...</option>';
+    selectSolPeriodo.innerHTML = '<option value="" disabled selected hidden>Seleccione un periodo disponible...</option>';
     if (datos.saldo && datos.saldo.detalleAnual) {
       datos.saldo.detalleAnual.forEach(p => {
         if (p.disponibles > 0) {
@@ -182,7 +187,7 @@ function renderDetalleAnual(detalle) {
     }
 
     const spanProgresivo = isProgresivo ? `<span class="badge bg-primary text-white ms-1">+${d.progresivos}</span>` : '0';
-    
+
     tbody.innerHTML += `
       <tr class="${rowClass}" ${d.es_periodo_base ? 'title="Base de 10 años cumplida"' : ''}>
         <td>${d.periodo}</td>

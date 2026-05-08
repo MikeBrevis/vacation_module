@@ -31,6 +31,8 @@ function renderTabla(empleados) {
             data-fechaingreso="${emp.fecha_ingreso ? emp.fecha_ingreso.split('T')[0] : ''}"
             data-anosext="${emp.anos_externos || 0}"
             data-mesesext="${emp.meses_externos || 0}"
+            data-fechacert="${emp.fecha_certificado ? emp.fecha_certificado.split('T')[0] : ''}"
+            data-totalcot="${emp.total_meses_cotizados || ''}"
             title="Editar">
             <i class="bi bi-pencil"></i>
           </button>
@@ -215,8 +217,8 @@ document.querySelector('#tablaEmpleados').addEventListener('click', e => {
 
     document.getElementById('editAnosExternos').value = btn.dataset.anosext;
     document.getElementById('editMesesExternos').value = btn.dataset.mesesext;
-    document.getElementById('editFechaCertificado').value = '';
-    document.getElementById('editTotalMesesCotizados').value = '';
+    document.getElementById('editFechaCertificado').value = btn.dataset.fechacert || '';
+    document.getElementById('editTotalMesesCotizados').value = btn.dataset.totalcot || '';
     
     // Show current experience registered
     const resultDiv = document.getElementById('resultadoCalculoEdit');

@@ -191,6 +191,24 @@ body {
   border-bottom: none;
 }
 
+/* Form Inputs styling */
+#solPeriodo, #histAnio, #fechaInicio, #fechaFin {
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+#solPeriodo:hover, #histAnio:hover, #fechaInicio:hover, #fechaFin:hover {
+  transform: translateY(-2px);
+  border-color: var(--blue);
+  background-color: #f8faff;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+}
+
+#solPeriodo option, #histAnio option {
+  cursor: pointer;
+  text-align: left;
+}
+
 .modal-title {
   letter-spacing: 0.06em;
 }

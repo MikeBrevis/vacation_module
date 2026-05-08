@@ -48,11 +48,11 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ mensaje: 'Los meses adicionales no pueden superar 11.' });
     }
 
-    const totMeses = total_meses_cotizados ? parseInt(total_meses_cotizados) : null;
+    const totMeses = (total_meses_cotizados !== undefined && total_meses_cotizados !== '' && total_meses_cotizados !== null) ? parseInt(total_meses_cotizados) : null;
     // La base de 10 años solo se marca automáticamente si los años EXTERNOS (previos al ingreso) son >= 10
     const cumpleDiez = cumple_10_anos_base || anosExt >= 10;
 
-    const certDate = fecha_certificado ? fecha_certificado : null;
+    const certDate = (fecha_certificado && fecha_certificado !== '') ? fecha_certificado : null;
 
     const [result] = await pool.query(
       'INSERT INTO empleados (rut, nombre_completo, cargo, fecha_ingreso, cumple_10_anos_base, anos_externos, meses_externos, fecha_certificado, total_meses_cotizados) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
