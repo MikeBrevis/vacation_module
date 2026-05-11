@@ -9,7 +9,6 @@ const app = express();
 
 app.use(cors({ origin: '*' }));
 app.use(express.json());
-app.use('/public', express.static(path.join(__dirname, 'public')));
 
 // Servir archivos estáticos del frontend (desde la raíz del proyecto)
 app.use(express.static(path.join(__dirname, '../')));
