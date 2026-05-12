@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - AndeCorp</title>
+  <meta name="description" content="Acceso al sistema de registro y control vacacional.">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Use Google Fonts (Anton & Inter/Roboto as per ande_design) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-card">
+      <div class="login-header">
+        <img src="logo.png" alt="AndeCorp Logo">
+        <h2 class="login-title">Iniciar Sesión</h2>
+      </div>
+      
+      <div id="loginAlert" class="alert alert-danger alert-message" role="alert"></div>
+
+      <form id="loginForm">
+        <div class="mb-3">
+          <label for="usuario" class="form-label">Usuario</label>
+          <input type="text" class="form-control" id="usuario" name="usuario" required autocomplete="username">
+        </div>
+        <div class="mb-4">
+          <label for="contraseña" class="form-label">Contraseña</label>
+          <input type="password" class="form-control" id="contraseña" name="contraseña" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="myButton">Ingresar</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Redirect to index if already logged in
+    if (localStorage.getItem('token')) {
+      window.location.href = 'index.html';
+    }
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const usuario = document.getElementById('usuario').value;
+      const contraseña = document.getElementById('contraseña').value;
+      const alertBox = document.getElementById('loginAlert');
+
+      try {
+        const response = await fetch('http://localhost:3000/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ usuario, contraseña })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          alertBox.textContent = data.message || 'Usuario o contraseña inválidos';
+          alertBox.style.display = 'block';
+        } else {
+          localStorage.setItem('token', data.token);
+          window.location.href = 'index.html';
+        }
+      } catch (error) {
+        alertBox.textContent = 'Error de conexión';
+        alertBox.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>

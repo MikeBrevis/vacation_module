@@ -1,11 +1,20 @@
 CREATE DATABASE IF NOT EXISTS vacation_db;
 USE vacation_db;
 
-DROP TABLE IF EXISTS solicitudes_vacaciones;
-DROP TABLE IF EXISTS empleados;
-DROP TABLE IF EXISTS feriados;
+CREATE TABLE IF NOT EXISTS usuarios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    usuario VARCHAR(255) UNIQUE NOT NULL,
+    password_hash CHAR(60) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_login TIMESTAMP NULL DEFAULT NULL
+);
 
-CREATE TABLE empleados (
+-- Insert sandra user
+INSERT INTO usuarios (usuario, password_hash)
+VALUES ('sandra', '$2b$10$AhgHxiX5A9OWyjJTfPxMJOC2udaWX8ED8atYuj6oOfM/miTRSLc6S');
+
+
+CREATE TABLE IF NOT EXISTS empleados (
     id INT AUTO_INCREMENT PRIMARY KEY,
     rut VARCHAR(12) NOT NULL UNIQUE,
     nombre_completo VARCHAR(150) NOT NULL,
@@ -20,12 +29,12 @@ CREATE TABLE empleados (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE feriados (
+CREATE TABLE IF NOT EXISTS feriados (
     fecha DATE PRIMARY KEY,
     descripcion VARCHAR(100) NOT NULL
 );
 
-CREATE TABLE solicitudes_vacaciones (
+CREATE TABLE IF NOT EXISTS solicitudes_vacaciones (
     id INT AUTO_INCREMENT PRIMARY KEY,
     empleado_id INT NOT NULL,
     fecha_inicio DATE NOT NULL,

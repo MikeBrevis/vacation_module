@@ -1,11 +1,29 @@
 const API_URL = 'http://localhost:3000/api';
+const AUTH_URL = 'http://localhost:3000/auth';
+
+// Verificación de sesión en páginas protegidas
+if (!window.location.pathname.endsWith('login.html')) {
+  if (!localStorage.getItem('token')) {
+    window.location.href = 'login.html';
+  }
+}
 
 async function request(url, options = {}) {
+  const token = localStorage.getItem('token');
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
   const res = await fetch(url, {
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     ...options
   });
   if (!res.ok) {
+    if (res.status === 401 || res.status === 403) {
+      localStorage.removeItem('token');
+      window.location.href = 'login.html';
+    }
     const err = await res.json().catch(() => ({ mensaje: 'Error desconocido' }));
     const error = new Error(err.mensaje || `HTTP ${res.status}`);
     error.status = res.status;

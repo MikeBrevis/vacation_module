@@ -206,15 +206,22 @@ function renderHistorial(solicitudes) {
   const tbody = document.querySelector('#tablaHistorial tbody');
   tbody.innerHTML = '';
   solicitudes.forEach(s => {
-    const fechaSol = new Date(s.fecha_solicitud).toLocaleDateString();
+    // Aseguramos formato DD-MM-YYYY para la fecha de solicitud también
+    const dateSol = new Date(s.fecha_solicitud);
+    const d = String(dateSol.getDate()).padStart(2, '0');
+    const m = String(dateSol.getMonth() + 1).padStart(2, '0');
+    const y = dateSol.getFullYear();
+    const fechaSol = `${d}-${m}-${y}`;
     const pdfUrl = `http://localhost:3000/api/solicitudes/${s.id}/pdf`;
 
     const fecha_inicio = s.fecha_inicio.split('T')[0];
     const fecha_fin = s.fecha_fin.split('T')[0];
     const anio = fecha_inicio.split('-')[0];
+    
+    const formatDDMMYYYY = (dateStr) => dateStr.split('-').reverse().join('-');
 
-    let tdInicio = `<td>${fecha_inicio}</td>`;
-    let tdTermino = `<td>${fecha_fin}</td>`;
+    let tdInicio = `<td>${formatDDMMYYYY(fecha_inicio)}</td>`;
+    let tdTermino = `<td>${formatDDMMYYYY(fecha_fin)}</td>`;
     let tdProgresivo = `<td></td>`;
 
     if (fecha_inicio.endsWith('-01-01') && fecha_fin.endsWith('-12-31')) {
