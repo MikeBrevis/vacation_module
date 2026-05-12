@@ -39,11 +39,13 @@ CREATE TABLE IF NOT EXISTS solicitudes_vacaciones (
     empleado_id INT NOT NULL,
     fecha_inicio DATE NOT NULL,
     fecha_fin DATE NOT NULL,
-    dias_habiles_consumidos INT NOT NULL,
+    dias_habiles_consumidos FLOAT NOT NULL,
     es_progresivo BOOLEAN DEFAULT FALSE,
     fecha_solicitud TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     ruta_comprobante VARCHAR(255) NULL,
     periodo_asignado INT NULL,
+    saldo_base_previo FLOAT NULL,
+    saldo_progresivo_previo FLOAT NULL,
     FOREIGN KEY (empleado_id) REFERENCES empleados(id) ON DELETE RESTRICT
 );
 

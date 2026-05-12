@@ -76,11 +76,11 @@ function generarPDF(datos, responseStream) {
     y += 30;
 
     doc.font('Helvetica-Bold').text('Fecha Desde:', leftCol, y);
-    doc.font('Helvetica').text(datos.es_historico ? `Año ${datos.anio}` : formatDate(datos.fecha_inicio), valCol, y);
+    doc.font('Helvetica').text(datos.es_historico ? `Periodo ${datos.anio}-${parseInt(datos.anio) + 1}` : formatDate(datos.fecha_inicio), valCol, y);
 
     y += 15;
     doc.font('Helvetica-Bold').text('Fecha Hasta:', leftCol, y);
-    doc.font('Helvetica').text(datos.es_historico ? `Año ${datos.anio}` : formatDate(datos.fecha_fin), valCol, y);
+    doc.font('Helvetica').text(datos.es_historico ? `(Histórico)` : formatDate(datos.fecha_fin), valCol, y);
 
     y += 15;
     doc.font('Helvetica-Bold').text('Inhábiles entre fechas:', leftCol, y);

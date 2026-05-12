@@ -35,6 +35,9 @@ router.get('/:id/pdf', async (req, res) => {
 
     const { calcularSaldo } = require('../services/vacacionesService');
     const saldo = await calcularSaldo(empleado.id);
+    
+    const saldo_base_total = solicitud.saldo_base_previo !== null ? solicitud.saldo_base_previo : saldo.saldoBaseTotal;
+    const saldo_progresivo_total = solicitud.saldo_progresivo_previo !== null ? solicitud.saldo_progresivo_previo : saldo.saldoProgresivoTotal;
 
     const fecha_ingreso = empleado.fecha_ingreso.toISOString().split('T')[0];
     
@@ -54,9 +57,9 @@ router.get('/:id/pdf', async (req, res) => {
       dias_habiles: solicitud.dias_habiles_consumidos,
       dias_inhabiles,
       dias_progresivos: saldo.diasProgresivosAnuales,
-      dias_pendientes: saldo.saldoActual,
-      saldo_base_total: saldo.saldoBaseTotal,
-      saldo_progresivo_total: saldo.saldoProgresivoTotal,
+      dias_pendientes: saldo_base_total + saldo_progresivo_total,
+      saldo_base_total: saldo_base_total,
+      saldo_progresivo_total: saldo_progresivo_total,
       es_historico,
       es_progresivo: solicitud.es_progresivo,
       anio

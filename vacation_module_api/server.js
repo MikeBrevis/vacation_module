@@ -26,10 +26,17 @@ app.use('/auth', /* authLimiter, */ require('./routes/auth'));
 // Middleware JWT
 const jwt = require('jsonwebtoken');
 const verifyToken = (req, res, next) => {
+  let token = null;
   const authHeader = req.headers['authorization'];
-  if (!authHeader) return res.status(403).send({ message: 'Acceso denegado.' });
   
-  const token = authHeader.split(' ')[1];
+  if (authHeader) {
+    token = authHeader.split(' ')[1];
+  } else if (req.query.token) {
+    token = req.query.token;
+  }
+  
+  if (!token) return res.status(403).send({ message: 'Acceso denegado.' });
+  
   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
     if (err) return res.status(401).send({ message: 'Token inválido o expirado.' });
     req.userId = decoded.userId;

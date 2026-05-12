@@ -212,7 +212,8 @@ function renderHistorial(solicitudes) {
     const m = String(dateSol.getMonth() + 1).padStart(2, '0');
     const y = dateSol.getFullYear();
     const fechaSol = `${d}-${m}-${y}`;
-    const pdfUrl = `http://localhost:3000/api/solicitudes/${s.id}/pdf`;
+    const token = localStorage.getItem('token');
+    const pdfUrl = `http://localhost:3000/api/solicitudes/${s.id}/pdf?token=${token}`;
 
     const fecha_inicio = s.fecha_inicio.split('T')[0];
     const fecha_fin = s.fecha_fin.split('T')[0];

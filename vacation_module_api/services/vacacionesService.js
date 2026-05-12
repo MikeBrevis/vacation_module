@@ -230,9 +230,12 @@ async function validarYCrearSolicitud(empleado_id, fecha_inicio, fecha_fin, es_p
     }
   }
 
+  const base_previo = es_progresivo ? saldos.saldoBaseTotal : saldos.saldoBaseTotal - dias_habiles;
+  const prog_previo = es_progresivo ? saldos.saldoProgresivoTotal - dias_habiles : saldos.saldoProgresivoTotal;
+
   const [result] = await pool.query(
-    'INSERT INTO solicitudes_vacaciones (empleado_id, fecha_inicio, fecha_fin, dias_habiles_consumidos, es_progresivo, periodo_asignado) VALUES (?, ?, ?, ?, ?, ?)',
-    [empleado_id, fecha_inicio, fecha_fin, dias_habiles, es_progresivo, periodo_asignado]
+    'INSERT INTO solicitudes_vacaciones (empleado_id, fecha_inicio, fecha_fin, dias_habiles_consumidos, es_progresivo, periodo_asignado, saldo_base_previo, saldo_progresivo_previo) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+    [empleado_id, fecha_inicio, fecha_fin, dias_habiles, es_progresivo, periodo_asignado, base_previo, prog_previo]
   );
 
   return { insertId: result.insertId, dias_habiles, saldos_previos: saldos };
@@ -249,9 +252,12 @@ async function crearSolicitudHistorica(empleado_id, year, dias) {
     throw new Error(`Saldo insuficiente. Días a registrar: ${dias_habiles}, Saldo: ${saldos.saldoActual}`);
   }
 
+  const base_previo = saldos.saldoBaseTotal - dias_habiles;
+  const prog_previo = saldos.saldoProgresivoTotal;
+
   const [result] = await pool.query(
-    'INSERT INTO solicitudes_vacaciones (empleado_id, fecha_inicio, fecha_fin, dias_habiles_consumidos, periodo_asignado) VALUES (?, ?, ?, ?, ?)',
-    [empleado_id, fecha_inicio, fecha_fin, dias_habiles, year]
+    'INSERT INTO solicitudes_vacaciones (empleado_id, fecha_inicio, fecha_fin, dias_habiles_consumidos, periodo_asignado, saldo_base_previo, saldo_progresivo_previo) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    [empleado_id, fecha_inicio, fecha_fin, dias_habiles, year, base_previo, prog_previo]
   );
 
   return { insertId: result.insertId, dias_habiles, saldos_previos: saldos };
