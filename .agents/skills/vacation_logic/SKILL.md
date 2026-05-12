@@ -1,6 +1,6 @@
 ---
 name: vacaciones-progresivas-chile
-description: >
+description:
   Reglas y lógica de negocio para calcular días de vacaciones anuales con feriado progresivo según
   ley chilena (Art. 67–68 Código del Trabajo). Usar este skill siempre que se necesite determinar
   cuántos días de vacaciones anuales le corresponden a un trabajador en Chile, considerando sus
