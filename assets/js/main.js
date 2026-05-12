@@ -17,6 +17,7 @@ function renderTabla(empleados) {
         <td>
           <strong>${emp.nombre_completo}</strong>
         </td>
+        <td>${emp.sucursal || ''}</td>
         <td>${emp.cargo}</td>
         <td class="td-saldo">${Math.floor(emp.saldoActual)}</td>
         <td class="text-center">
@@ -28,6 +29,7 @@ function renderTabla(empleados) {
             data-rut="${emp.rut}"
             data-nombre="${emp.nombre_completo}"
             data-cargo="${emp.cargo}"
+            data-sucursal="${emp.sucursal || ''}"
             data-fechaingreso="${emp.fecha_ingreso ? emp.fecha_ingreso.split('T')[0] : ''}"
             data-anosext="${emp.anos_externos || 0}"
             data-mesesext="${emp.meses_externos || 0}"
@@ -163,6 +165,7 @@ document.getElementById('formNuevoEmpleado').addEventListener('submit', async e 
     rut,
     nombre_completo: nombre,
     cargo: cargo,
+    sucursal: document.getElementById('sucursal').value,
     fecha_ingreso: document.getElementById('fechaIngreso').value,
     cumple_10_anos_base: false,
     anos_externos: parseInt(document.getElementById('anosExternos').value || 0),
@@ -213,6 +216,7 @@ document.querySelector('#tablaEmpleados').addEventListener('click', e => {
     document.getElementById('editRut').value = btn.dataset.rut;
     document.getElementById('editNombre').value = btn.dataset.nombre;
     document.getElementById('editCargo').value = btn.dataset.cargo;
+    document.getElementById('editSucursal').value = btn.dataset.sucursal || '';
     document.getElementById('editFechaIngreso').value = btn.dataset.fechaingreso || '';
 
     document.getElementById('editAnosExternos').value = btn.dataset.anosext;
@@ -249,6 +253,7 @@ document.getElementById('formEditarEmpleado').addEventListener('submit', async e
     rut,
     nombre_completo: nombre,
     cargo: cargo,
+    sucursal: document.getElementById('editSucursal').value,
     fecha_ingreso: document.getElementById('editFechaIngreso').value,
     cumple_10_anos_base: false,
     anos_externos: parseInt(document.getElementById('editAnosExternos').value || 0),

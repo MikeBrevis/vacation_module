@@ -34,7 +34,8 @@
         <thead>
           <tr>
             <th>RUT</th>
-            <th >Nombre</th>
+            <th>Nombre</th>
+            <th>Sucursal</th>
             <th>Cargo</th>
             <th>Días Disponible</th>
             <th>Acciones</th>
@@ -70,6 +71,19 @@
             <div class="mb-2">
               <label class="form-label">Cargo</label>
               <input type="text" id="cargo" class="form-control" required>
+            </div>
+            <div class="mb-2">
+              <label class="form-label">Sucursal</label>
+              <select id="sucursal" class="form-select" required>
+                <option value="" disabled selected>Seleccione sucursal</option>
+                <option value="Iquique">Iquique</option>
+                <option value="Antofagasta">Antofagasta</option>
+                <option value="Puchuncaví">Puchuncaví</option>
+                <option value="Santiago">Santiago</option>
+                <option value="Talca">Talca</option>
+                <option value="Concepción">Concepción</option>
+                <option value="Puerto Montt">Puerto Montt</option>
+              </select>
             </div>
             <div class="mb-2">
               <label class="form-label">Fecha Ingreso</label>
@@ -125,6 +139,19 @@
             <div class="mb-3">
               <label class="form-label">Cargo</label>
               <input type="text" id="editCargo" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Sucursal</label>
+              <select id="editSucursal" class="form-select" required>
+                <option value="" disabled selected>Seleccione sucursal</option>
+                <option value="Iquique">Iquique</option>
+                <option value="Antofagasta">Antofagasta</option>
+                <option value="Puchuncaví">Puchuncaví</option>
+                <option value="Santiago">Santiago</option>
+                <option value="Talca">Talca</option>
+                <option value="Concepción">Concepción</option>
+                <option value="Puerto Montt">Puerto Montt</option>
+              </select>
             </div>
             <div class="mb-3">
               <label class="form-label">Fecha de Ingreso</label>

@@ -10,6 +10,7 @@ CREATE TABLE empleados (
     rut VARCHAR(12) NOT NULL UNIQUE,
     nombre_completo VARCHAR(150) NOT NULL,
     cargo VARCHAR(100) NOT NULL,
+    sucursal VARCHAR(50) NULL,
     fecha_ingreso DATE NOT NULL,
     cumple_10_anos_base TINYINT(1) DEFAULT 0,
     dias_progresivos_base INT DEFAULT 0,
