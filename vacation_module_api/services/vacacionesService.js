@@ -38,10 +38,19 @@ async function calcularSaldo(empleadoId) {
   const consumidosBasePorPeriodo = {};
   const consumidosProgPorPeriodo = {};
   
+  let total_consumido_base = 0;
+  let total_consumido_prog = 0;
+
   solicitudes.forEach(s => {
-    total_consumido += parseFloat(s.dias_habiles_consumidos);
+    const dias = parseFloat(s.dias_habiles_consumidos);
+    total_consumido += dias;
+    if (s.es_progresivo) {
+      total_consumido_prog += dias;
+    } else {
+      total_consumido_base += dias;
+    }
+
     if (s.periodo_asignado) {
-      const dias = parseFloat(s.dias_habiles_consumidos);
       consumidosPorPeriodo[s.periodo_asignado] = (consumidosPorPeriodo[s.periodo_asignado] || 0) + dias;
       if (s.es_progresivo) {
         consumidosProgPorPeriodo[s.periodo_asignado] = (consumidosProgPorPeriodo[s.periodo_asignado] || 0) + dias;
@@ -166,8 +175,15 @@ async function calcularSaldo(empleadoId) {
   const consumido = parseFloat(total_consumido);
   const saldoActual = Math.floor(diasLegalesAcumulados + diasProgresivosTotal - consumido);
 
+  const saldoBaseTotal = Math.max(0, parseFloat((diasLegalesAcumulados - total_consumido_base).toFixed(2)));
+  const saldoProgresivoTotal = Math.max(0, parseFloat((diasProgresivosTotal - total_consumido_prog).toFixed(2)));
+
   return {
     diasLegalesAcumulados,
+    total_consumido_base,
+    total_consumido_prog,
+    saldoBaseTotal,
+    saldoProgresivoTotal,
     anosEnEmpresa,
     anosExternos,
     mesesExternos,

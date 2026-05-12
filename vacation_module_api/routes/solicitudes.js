@@ -55,6 +55,8 @@ router.get('/:id/pdf', async (req, res) => {
       dias_inhabiles,
       dias_progresivos: saldo.diasProgresivosAnuales,
       dias_pendientes: saldo.saldoActual,
+      saldo_base_total: saldo.saldoBaseTotal,
+      saldo_progresivo_total: saldo.saldoProgresivoTotal,
       es_historico,
       es_progresivo: solicitud.es_progresivo,
       anio

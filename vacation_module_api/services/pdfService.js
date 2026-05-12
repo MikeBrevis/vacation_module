@@ -20,7 +20,7 @@ function generarPDF(datos, responseStream) {
     // COMPROBANTE DE FERIADO LEGAL O PROGRESIVO
     const titulo = datos.es_progresivo ? 'COMPROBANTE DE FERIADO PROGRESIVO' : 'COMPROBANTE DE FERIADO LEGAL';
     doc.font('Helvetica-Bold').fontSize(16)
-       .text(titulo, x, y + 25, { align: 'center', width: width });
+      .text(titulo, x, y + 25, { align: 'center', width: width });
 
     const logoPath = path.join(__dirname, '../../logo.png');
     if (fs.existsSync(logoPath)) {
@@ -41,7 +41,7 @@ function generarPDF(datos, responseStream) {
     doc.font('Helvetica-Bold').fontSize(10);
     doc.text('Fecha de Comprobante:', leftCol, y);
     doc.font('Helvetica').text(formattedToday, valCol, y);
-    
+
     y += 15;
     doc.font('Helvetica-Bold').text('Empresa:', leftCol, y);
     doc.font('Helvetica').text('ANDECORP', valCol, y);
@@ -74,7 +74,7 @@ function generarPDF(datos, responseStream) {
     doc.text(usoDe, leftCol, y);
 
     y += 30;
-    
+
     doc.font('Helvetica-Bold').text('Fecha Desde:', leftCol, y);
     doc.font('Helvetica').text(datos.es_historico ? `Año ${datos.anio}` : formatDate(datos.fecha_inicio), valCol, y);
 
@@ -83,8 +83,13 @@ function generarPDF(datos, responseStream) {
     doc.font('Helvetica').text(datos.es_historico ? `Año ${datos.anio}` : formatDate(datos.fecha_fin), valCol, y);
 
     y += 15;
-    doc.font('Helvetica-Bold').text('Días Vacaciones:', leftCol, y);
-    doc.font('Helvetica').text(datos.dias_habiles.toString(), valCol, y);
+    doc.font('Helvetica-Bold').text('Inhábiles entre fechas:', leftCol, y);
+    doc.font('Helvetica').text(datos.dias_inhabiles.toString(), valCol, y);
+
+    y += 25;
+    doc.font('Helvetica-Bold').fontSize(15).text('Días Vacaciones:', leftCol, y);
+    doc.font('Helvetica').fontSize(15).text(datos.dias_habiles.toString(), valCol, y);
+    doc.fontSize(10);
 
     y += 40;
     // Firma Trabajador
@@ -95,43 +100,41 @@ function generarPDF(datos, responseStream) {
     y += 20;
     // Línea separadora 2
     doc.moveTo(x, y).lineTo(x + width, y).stroke();
-    
+
     // Sección 3: Tabla Detalle
     const tableTop = y;
-    const tableBottom = y + 120;
+    const tableBottom = y + 130;
     const col1W = 220;
     const col2W = 80;
-    
+
     // Líneas verticales de la tabla
     doc.moveTo(x + col1W, tableTop).lineTo(x + col1W, tableBottom).stroke();
     doc.moveTo(x + col1W + col2W, tableTop).lineTo(x + col1W + col2W, tableBottom).stroke();
 
     y += 15;
-    doc.font('Helvetica-Bold').text('Detalle de Feriado', x + 15, y);
+    doc.font('Helvetica-Bold').text('Detalle saldo de dias pendientes', x + 15, y);
     doc.text('Días', x + col1W, y, { width: col2W, align: 'center' });
 
     y += 15;
     // Línea horizontal de encabezado de tabla
     doc.moveTo(x, y).lineTo(x + col1W + col2W, y).stroke();
 
-    y += 15;
-    doc.font('Helvetica').text('Días Hábiles', x + 15, y);
-    doc.text(datos.dias_habiles.toString(), x + col1W, y, { width: col2W, align: 'center' });
 
-    y += 15;
-    doc.text('Inhábiles / Domingos', x + 15, y);
-    doc.text(datos.dias_inhabiles.toString(), x + col1W, y, { width: col2W, align: 'center' });
 
-    y += 15;
-    doc.text('Días Progresivos', x + 15, y);
-    doc.text(datos.dias_progresivos.toString(), x + col1W, y, { width: col2W, align: 'center' });
+    y += 20;
+    doc.font('Helvetica-Bold').text('Saldo Días Progresivos', x + 15, y);
+    doc.text(datos.saldo_progresivo_total.toString(), x + col1W, y, { width: col2W, align: 'center' });
 
-    y += 15;
-    doc.text('Días Pendientes', x + 15, y);
-    doc.text(datos.dias_pendientes.toString(), x + col1W, y, { width: col2W, align: 'center' });
+    y += 20;
+    doc.text('Saldo Días Base Pendientes', x + 15, y);
+    doc.text(datos.saldo_base_total.toString(), x + col1W, y, { width: col2W, align: 'center' });
+
+    y += 20;
+    doc.text('Total Pendiente', x + 15, y);
+    doc.text((datos.saldo_base_total + datos.saldo_progresivo_total).toFixed(2), x + col1W, y, { width: col2W, align: 'center' });
 
     // Firma Empleador
-    const signY = tableBottom - 35;
+    const signY = tableBottom - 45;
     doc.text('_____________________________', x + col1W + col2W, signY, { align: 'center', width: width - col1W - col2W });
     doc.text('FIRMA EMPLEADOR', x + col1W + col2W, signY + 15, { align: 'center', width: width - col1W - col2W });
 
