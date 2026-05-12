@@ -119,8 +119,6 @@ function generarPDF(datos, responseStream) {
     // Línea horizontal de encabezado de tabla
     doc.moveTo(x, y).lineTo(x + col1W + col2W, y).stroke();
 
-
-
     y += 20;
     doc.font('Helvetica-Bold').text('Saldo Días Progresivos', x + 15, y);
     doc.text(datos.saldo_progresivo_total.toString(), x + col1W, y, { width: col2W, align: 'center' });

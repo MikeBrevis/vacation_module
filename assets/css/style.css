@@ -229,6 +229,3 @@ body {
 .modal-footer .btn[type="submit"]:hover {
   filter: brightness(0.92);
 }
-
-/* --- Google Fonts import ----------------------------------- */
-@import url('https://fonts.googleapis.com/css2?family=Anton&display=swap');

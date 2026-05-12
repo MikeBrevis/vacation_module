@@ -13,7 +13,6 @@ CREATE TABLE empleados (
     sucursal VARCHAR(50) NULL,
     fecha_ingreso DATE NOT NULL,
     cumple_10_anos_base TINYINT(1) DEFAULT 0,
-    dias_progresivos_base INT DEFAULT 0,
     anos_externos INT DEFAULT 0,
     meses_externos INT DEFAULT 0,
     fecha_certificado DATE NULL,
