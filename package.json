@@ -1,0 +1,12 @@
+{
+  "name": "vacation-module",
+  "version": "1.0.0",
+  "scripts": {
+    "test:e2e": "npx playwright test",
+    "test:e2e:ui": "npx playwright test --ui",
+    "test:backend": "npm test --prefix vacation_module_api"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.60.0"
+  }
+}

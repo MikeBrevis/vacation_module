@@ -6,6 +6,7 @@ node_modules/
 
 # Local AI context
 .context/
+.agents/
 
 # OS generated files
 Thumbs.db
@@ -19,3 +20,9 @@ Thumbs.db
 # Logs
 *.log
 npm-debug.log*
+
+# Testing & QA
+playwright-report/
+test-results/
+coverage/
+.playwright/

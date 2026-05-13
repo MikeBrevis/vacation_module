@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest --detectOpenHandles"
   },
   "keywords": [],
   "author": "",
@@ -19,10 +19,15 @@
     "express": "^5.2.1",
     "express-rate-limit": "^8.5.1",
     "express-validator": "^7.3.2",
+    "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
     "mysql2": "^3.22.2",
     "node-cron": "^4.2.1",
     "pdfkit": "^0.18.0",
     "validador-digito-verificador-chile": "^1.0.7"
+  },
+  "devDependencies": {
+    "jest": "^30.4.2",
+    "supertest": "^7.2.2"
   }
 }
