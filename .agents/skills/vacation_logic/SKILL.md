@@ -5,7 +5,7 @@ description:
   ley chilena (Art. 67–68 Código del Trabajo). Usar este skill siempre que se necesite determinar
   cuántos días de vacaciones anuales le corresponden a un trabajador en Chile, considerando sus
   años de cotizaciones totales acumuladas y sus años de antigüedad en la empresa actual. Activar
-  ante cualquier consulta sobre: días de vacaciones, feriado progresivo, cotizaciones acumuladas,
+  ante cualquier consulta sobre días de vacaciones, feriado progresivo, cotizaciones acumuladas,
   años en empresa, o cálculo de beneficios de descanso anual en Chile.
 ---
 
@@ -46,6 +46,17 @@ días_progresivos = ENTERO_INFERIOR( años_desde_umbral / 3 )
 días_vacaciones_anuales = 15 + días_progresivos
 ```
 Siempre usar entero inferior (redondear hacia abajo). Nunca redondear hacia arriba.
+
+### Regla 6 – Disponibilidad Inmediata y Saldo Negativo
+Apenas comience enero de un nuevo periodo, el sistema debe permitir que se ingresen todas las vacaciones correspondientes a este periodo, considerando los 15 días legales más los días progresivos que correspondan. Esto permite registrar vacaciones adelantadas. Si el trabajador toma estos días antes de completar el año al periodo correspondiente, su saldo disponible actual figurará en **negativo**.
+
+Ejemplo: el trabajador comenzo el 06-12. El sistema permitira tomar al trabajador los 15 dias del periodo 2012-2013 en enero del 2013, considerando saldo negativo que se ira reestableciendo.
+
+### Regla 7 – Límite de Saldo Negativo
+La regla central del sistema sobre vacaciones adelantadas es que **no se pueden acumular más de 15 días negativos**. El agente no debe permitir procesar solicitudes que dejen al trabajador con un saldo negativo mayor a -15 días.
+
+### Regla 8 – Restablecimiento del Saldo
+El saldo actual disponible se irá restableciendo paulatinamente (volviendo a cero y luego pasando a positivo) en base a la acumulación progresiva de los días legales y progresivos que el trabajador gane por el transcurso del tiempo trabajado.
 
 ---
 
@@ -135,3 +146,6 @@ Trabajador ingresa con **15 años cotizados** en empleadores anteriores. Lleva *
 - Si el resultado de la división tiene decimales, **siempre tomar el entero inferior** (ej: 7 ÷ 3 = 2.33 → usar 2).
 - El mínimo de días de vacaciones anuales es siempre **15**. El progresivo solo suma, nunca resta.
 - Informar siempre **cuántos años faltan** para el próximo día adicional, calculando cuánto le falta para completar el siguiente tramo de 3 años.
+- **Permitir saldo negativo**: Entender que si se solicitan vacaciones adelantadas apenas inicia el periodo, el saldo disponible puede ser menor a cero.
+- **Validar el límite de saldo negativo**: Rechazar o advertir si la solicitud implica acumular un saldo negativo que sobrepase los **15 días**.
+- Tener en cuenta que el saldo actual se irá **reestableciendo** en base a la acumulación de días legales y progresivos a medida que transcurre el año.

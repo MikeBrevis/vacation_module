@@ -239,12 +239,14 @@
   <div class="modal fade" id="modalSaldoNegativo" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
-        <div class="modal-header bg-warning text-dark">
-          <h5 class="modal-title"><i class="bi bi-exclamation-triangle-fill me-2"></i>Advertencia: Saldo Negativo</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-header bg-warning text-dark position-relative d-flex justify-content-center">
+          <h5 class="modal-title fw-bold text-center w-100"><i class="bi bi-exclamation-triangle-fill me-2"></i>Advertencia: Saldo
+            Negativo
+          </h5>
+          <button type="button" class="btn-close position-absolute end-0 me-3" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <p>La solicitud excede los días disponibles del periodo seleccionado. Si continúa, el saldo del empleado
+          <p class="fw-bold" style="text-align: justify;">La solicitud excede los días disponibles del periodo seleccionado. Si continúa, el saldo del empleado
             quedará en <strong class="text-danger">negativo</strong>.</p>
           <table class="table table-bordered text-center mb-3">
             <tbody>
@@ -266,12 +268,12 @@
               </tr>
             </tbody>
           </table>
-          <p class="small text-muted mb-0">El saldo negativo se irá restableciendo conforme se acumulen los días
+          <p class="small text-muted mb-0" style="text-align: justify;">El saldo negativo se irá restableciendo conforme se acumulen los días
             legales y progresivos correspondientes.</p>
         </div>
-        <div class="modal-footer">
+        <div class="modal-footer justify-content-center">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="button" class="btn btn-warning text-dark fw-bold" id="btnConfirmarSaldoNeg">Sí, Procesar
+          <button type="button" class="btn btn-warning text-dark fw-bold" id="btnConfirmarSaldoNeg">Procesar
             Solicitud</button>
         </div>
       </div>
