@@ -1,5 +1,7 @@
-const API_URL = 'http://localhost:3000/api';
-const AUTH_URL = 'http://localhost:3000/auth';
+/* const API_URL = 'http://localhost:3000/api';
+const AUTH_URL = 'http://localhost:3000/auth'; */
+const API_URL = '/api';
+const AUTH_URL = '/auth';
 
 // Verificación de sesión en páginas protegidas
 if (!window.location.pathname.endsWith('login.html')) {
