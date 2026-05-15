@@ -79,6 +79,7 @@
                   <th>Total Ganado</th>
                   <th>Cons. Base</th>
                   <th>Cons. Prog.</th>
+                  <th>Excedente</th>
                   <th>Disponibles</th>
                 </tr>
               </thead>
@@ -229,6 +230,49 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
           <button type="button" class="btn btn-danger" id="btnConfirmarAnular">Sí, Anular</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Confirmación Saldo Negativo -->
+  <div class="modal fade" id="modalSaldoNegativo" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-warning text-dark">
+          <h5 class="modal-title"><i class="bi bi-exclamation-triangle-fill me-2"></i>Advertencia: Saldo Negativo</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>La solicitud excede los días disponibles del periodo seleccionado. Si continúa, el saldo del empleado
+            quedará en <strong class="text-danger">negativo</strong>.</p>
+          <table class="table table-bordered text-center mb-3">
+            <tbody>
+              <tr>
+                <td class="text-muted">Días Solicitados</td>
+                <td class="fw-bold" id="saldoNegDiasSolicitados">0</td>
+              </tr>
+              <tr>
+                <td class="text-muted">Disponibles en Periodo</td>
+                <td class="fw-bold" id="saldoNegDisponibles">0</td>
+              </tr>
+              <tr>
+                <td class="text-muted">Saldo Actual</td>
+                <td class="fw-bold" id="saldoNegActual">0</td>
+              </tr>
+              <tr class="table-danger">
+                <td class="text-muted fw-bold">Saldo Resultante</td>
+                <td class="fw-bold text-danger fs-5" id="saldoNegResultante">0</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="small text-muted mb-0">El saldo negativo se irá restableciendo conforme se acumulen los días
+            legales y progresivos correspondientes.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-warning text-dark fw-bold" id="btnConfirmarSaldoNeg">Sí, Procesar
+            Solicitud</button>
         </div>
       </div>
     </div>

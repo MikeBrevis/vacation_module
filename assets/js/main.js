@@ -19,7 +19,7 @@ function renderTabla(empleados) {
         </td>
         <td>${emp.sucursal || ''}</td>
         <td>${emp.cargo}</td>
-        <td class="td-saldo">${Math.floor(emp.saldoActual)}</td>
+        <td class="td-saldo">${emp.saldoActual.toFixed(2)}</td>
         <td class="text-center">
           <a href="empleado.html?id=${emp.id}" class="action-btn" title="Ver Detalle">
             <i class="bi bi-eye"></i>

@@ -6,10 +6,24 @@ const { generarPDF } = require('../services/pdfService');
 
 router.post('/', async (req, res) => {
   try {
-    const { empleado_id, fecha_inicio, fecha_fin, es_progresivo, periodo_asignado } = req.body;
-    const { insertId } = await validarYCrearSolicitud(empleado_id, fecha_inicio, fecha_fin, es_progresivo, periodo_asignado);
+    const { empleado_id, fecha_inicio, fecha_fin, es_progresivo, periodo_asignado, forzar } = req.body;
+    const { insertId } = await validarYCrearSolicitud(empleado_id, fecha_inicio, fecha_fin, es_progresivo, periodo_asignado, forzar === true);
     res.status(201).json({ mensaje: 'Solicitud creada', solicitud_id: insertId });
-  } catch (error) { res.status(422).json({ mensaje: error.message }); }
+  } catch (error) {
+    // Advertencia de saldo negativo: 409 con detalle para pedir confirmación al usuario
+    if (error.code === 'SALDO_NEGATIVO') {
+      return res.status(409).json({
+        mensaje: error.message,
+        code: error.code,
+        detalle: error.detalle
+      });
+    }
+    // Bloqueo absoluto: progresivos excedidos o límite de -15 rebasado
+    if (error.code === 'PROG_EXCEEDED' || error.code === 'LIMIT_EXCEEDED') {
+      return res.status(422).json({ mensaje: error.message, code: error.code });
+    }
+    res.status(422).json({ mensaje: error.message });
+  }
 });
 
 router.post('/historico', async (req, res) => {

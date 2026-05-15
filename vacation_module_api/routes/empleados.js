@@ -22,7 +22,7 @@ router.get('/:id', async (req, res) => {
     if (!empleado) return res.status(404).json({ mensaje: 'Empleado no encontrado' });
 
     const saldo = await calcularSaldo(id);
-    const [solicitudes] = await pool.query('SELECT * FROM solicitudes_vacaciones WHERE empleado_id = ? ORDER BY fecha_inicio DESC', [id]);
+    const [solicitudes] = await pool.query('SELECT * FROM solicitudes_vacaciones WHERE empleado_id = ? ORDER BY id DESC', [id]);
 
     res.json({ empleado, saldo, solicitudes });
   } catch (error) { res.status(500).json({ mensaje: error.message }); }

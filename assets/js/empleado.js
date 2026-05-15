@@ -2,6 +2,9 @@ const params = new URLSearchParams(window.location.search);
 const id = params.get('id');
 if (!id) window.location.href = 'index.html';
 
+// Estado global para el modal de confirmación de saldo negativo
+let solicitudPendiente = null;
+
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     const datos = await api.getEmpleadoDetalle(id);
@@ -53,14 +56,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Poblar el selector de periodos disponibles para nueva solicitud
+    // Solo periodos con días disponibles + el último periodo (permite adelantadas)
     const selectSolPeriodo = document.getElementById('solPeriodo');
     selectSolPeriodo.innerHTML = '<option value="" disabled selected hidden>Seleccione un periodo disponible...</option>';
     if (datos.saldo && datos.saldo.detalleAnual) {
       datos.saldo.detalleAnual.forEach(p => {
-        if (p.disponibles > 0) {
-          const opt = document.createElement('option');
-          opt.value = p.startYear;
+        const opt = document.createElement('option');
+        opt.value = p.startYear;
+        if (p.disponibles > 0 || p.disponibles_base > 0 || p.disponibles_prog > 0) {
           opt.textContent = `${p.periodo} (${p.disponibles} días disp.)`;
+          selectSolPeriodo.appendChild(opt);
+        } else if (p.es_ultimo_periodo) {
+          // Último periodo: siempre visible, permite vacaciones adelantadas
+          opt.textContent = `${p.periodo} (${p.disponibles} días disp.) — Adelantadas`;
+          selectSolPeriodo.appendChild(opt);
+        } else {
+          // Periodo agotado: mostrar deshabilitado
+          opt.textContent = `${p.periodo} (Agotado)`;
+          opt.disabled = true;
           selectSolPeriodo.appendChild(opt);
         }
       });
@@ -159,9 +172,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 function renderPanelSaldos(saldo) {
-  const color = saldo.saldoActual < 5 ? 'danger' : saldo.saldoActual <= 10 ? 'warning' : 'success';
-  document.getElementById('saldoActual').textContent = saldo.saldoActual;
-  document.getElementById('saldoActual').className = `text-${color} fw-bold display-4`;
+  // Regla 6-8: Saldo puede ser negativo, reflejar con color rojo
+  let color;
+  if (saldo.saldoActual < 0) {
+    color = 'danger';
+  } else if (saldo.saldoActual < 5) {
+    color = 'warning';
+  } else if (saldo.saldoActual <= 10) {
+    color = 'warning';
+  } else {
+    color = 'success';
+  }
+
+  const saldoEl = document.getElementById('saldoActual');
+  saldoEl.textContent = saldo.saldoActual;
+  saldoEl.className = `text-${color} fw-bold display-4`;
 
   document.getElementById('saldoLegales').textContent = saldo.diasLegalesAcumulados;
   document.getElementById('saldoProgresivosAcumulados').textContent = saldo.diasProgresivosTotal;
@@ -173,20 +198,29 @@ function renderDetalleAnual(detalle) {
   const tbody = document.getElementById('tablaDetalleAnual');
   if (!tbody) return;
   tbody.innerHTML = '';
-  detalle.forEach(d => {
+  const detalleReverso = [...detalle].reverse();
+  detalleReverso.forEach(d => {
     const isProgresivo = d.progresivos > 0;
-    const isAgotado = d.disponibles == 0;
 
     let rowClass = '';
     if (d.es_periodo_base) {
       rowClass = 'table-primary fw-bold'; // Hito 10 años: AZUL
     } else if (d.disponibles > 0) {
       rowClass = 'table-success';         // Disponible: VERDE
+    } else if (d.disponibles < 0) {
+      rowClass = 'table-danger';          // Saldo negativo: ROJO
     } else {
-      rowClass = 'table-danger text-muted'; // Agotado: ROJO
+      rowClass = 'table-danger text-muted'; // Agotado: ROJO atenuado
     }
 
     const spanProgresivo = isProgresivo ? `<span class="badge bg-primary text-white ms-1">+${d.progresivos}</span>` : '0';
+
+    // Mostrar disponibles en rojo si son negativos
+    const dispClass = d.disponibles < 0 ? 'text-danger fw-bold' : '';
+    const dispText = d.disponibles < 0 ? `${d.disponibles}` : d.disponibles;
+
+    // Excedente: mostrar en naranja si > 0
+    const excText = d.excedente_previo > 0 ? `<span class="fw-bold text-danger">${d.excedente_previo}</span>` : '-';
 
     tbody.innerHTML += `
       <tr class="${rowClass}" ${d.es_periodo_base ? 'title="Base de 10 años cumplida"' : ''}>
@@ -196,7 +230,8 @@ function renderDetalleAnual(detalle) {
         <td>${d.total}</td>
         <td>${d.consumidos_base}</td>
         <td>${d.consumidos_prog}</td>
-        <td>${d.disponibles}</td>
+        <td>${excText}</td>
+        <td class="${dispClass}">${dispText}</td>
       </tr>
     `;
   });
@@ -218,7 +253,7 @@ function renderHistorial(solicitudes) {
     const fecha_inicio = s.fecha_inicio.split('T')[0];
     const fecha_fin = s.fecha_fin.split('T')[0];
     const anio = fecha_inicio.split('-')[0];
-    
+
     const formatDDMMYYYY = (dateStr) => dateStr.split('-').reverse().join('-');
 
     let tdInicio = `<td>${formatDDMMYYYY(fecha_inicio)}</td>`;
@@ -252,18 +287,86 @@ function renderHistorial(solicitudes) {
   });
 }
 
+// ─── Enviar solicitud con soporte para confirmación de saldo negativo ───
+async function enviarSolicitud(datos, forzar = false) {
+  const payload = { ...datos, forzar };
+  const token = localStorage.getItem('token');
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  const res = await fetch(`${API_URL}/solicitudes`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(payload)
+  });
+
+  const body = await res.json();
+
+  if (res.status === 409 && body.code === 'SALDO_NEGATIVO') {
+    // Mostrar modal de confirmación con los detalles
+    return { tipo: 'advertencia', body, datos };
+  }
+
+  if (!res.ok) {
+    throw new Error(body.mensaje || `Error HTTP ${res.status}`);
+  }
+
+  return { tipo: 'exito', body };
+}
+
 document.getElementById('formSolicitud').addEventListener('submit', async e => {
   e.preventDefault();
   const fechaInicio = document.getElementById('fechaInicio').value;
   const fechaFin = document.getElementById('fechaFin').value;
   const esProgresivo = document.getElementById('esProgresiva').checked;
   const periodoAsignado = document.getElementById('solPeriodo').value;
+  const container = document.getElementById('alertaSolicitud');
+  container.innerHTML = '';
+
   try {
-    await api.registrarSolicitud({ empleado_id: id, fecha_inicio: fechaInicio, fecha_fin: fechaFin, es_progresivo: esProgresivo, periodo_asignado: periodoAsignado });
+    const datos = { empleado_id: id, fecha_inicio: fechaInicio, fecha_fin: fechaFin, es_progresivo: esProgresivo, periodo_asignado: periodoAsignado };
+    const resultado = await enviarSolicitud(datos);
+
+    if (resultado.tipo === 'advertencia') {
+      // Guardar datos para reenviar con forzar=true si el usuario confirma
+      solicitudPendiente = datos;
+      const det = resultado.body.detalle;
+
+      // Poblar el modal de confirmación
+      document.getElementById('saldoNegDiasSolicitados').textContent = det.dias_solicitados;
+      document.getElementById('saldoNegDisponibles').textContent = det.disponibles_periodo;
+      document.getElementById('saldoNegActual').textContent = det.saldo_actual;
+      document.getElementById('saldoNegResultante').textContent = det.saldo_resultante;
+
+      const modal = new bootstrap.Modal(document.getElementById('modalSaldoNegativo'));
+      modal.show();
+      return;
+    }
+
+    // Éxito: recargar
     window.location.reload();
   } catch (err) {
-    const container = document.getElementById('alertaSolicitud');
     container.innerHTML = `<div class="alert alert-danger alert-dismissible fade show">${err.message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>`;
+  }
+});
+
+// Confirmar solicitud con saldo negativo
+document.getElementById('btnConfirmarSaldoNeg')?.addEventListener('click', async () => {
+  if (!solicitudPendiente) return;
+  const btn = document.getElementById('btnConfirmarSaldoNeg');
+  const container = document.getElementById('alertaSolicitud');
+  try {
+    btn.disabled = true;
+    btn.textContent = 'Procesando...';
+    const resultado = await enviarSolicitud(solicitudPendiente, true);
+    if (resultado.tipo === 'exito') {
+      window.location.reload();
+    }
+  } catch (err) {
+    container.innerHTML = `<div class="alert alert-danger alert-dismissible fade show">${err.message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>`;
+    btn.disabled = false;
+    btn.textContent = 'Sí, Procesar Solicitud';
+    bootstrap.Modal.getInstance(document.getElementById('modalSaldoNegativo'))?.hide();
   }
 });
 

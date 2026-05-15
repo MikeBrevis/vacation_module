@@ -153,30 +153,156 @@ async function calcularSaldo(empleadoId) {
       baseYaAlcanzada = true;
     }
 
+    // Calcular días progresivos correspondientes a este periodo proporcional (adelantados)
+    let mesesParaBaseCalculo = 0;
+    if (!tieneBaseDiezAnos) {
+       mesesParaBaseCalculo = Math.max(0, (10 * 12) - mesesTotalExternos);
+    }
+    const mesesPostBaseEnAniversario = Math.max(0, ((anosEnEmpresa + 1) * 12) - mesesParaBaseCalculo);
+    const anosPostBaseEnAniversario = Math.floor(mesesPostBaseEnAniversario / 12);
+    const progr = Math.floor(anosPostBaseEnAniversario / 3);
+
+    diasProgresivosAcumulados += progr;
+
     detalleAnual.push({
       startYear,
       periodo: `${startYear} - Actual`,
       base: tot,
-      progresivos: 0,
-      total: tot,
+      progresivos: progr,
+      total: tot + progr,
       consumidos: consTotal,
       consumidos_base: consBase,
       consumidos_prog: consProg,
-      disponibles: tot - consTotal,
+      disponibles: (tot + progr) - consTotal,
       disponibles_base: tot - consBase,
-      disponibles_prog: 0 - consProg,
+      disponibles_prog: progr - consProg,
       es_periodo_base: esPeriodoBase
     });
+  }
+
+  // === Segunda pasada: calcular excedentes (overflow entre periodos) ===
+  let maxYearInSolicitudes = ingreso.getFullYear();
+  for (const yearStr in consumidosPorPeriodo) {
+    const y = parseInt(yearStr);
+    if (y > maxYearInSolicitudes) maxYearInSolicitudes = y;
+  }
+
+  let excedenteBase = 0;
+  let excedenteProg = 0;
+  
+  for (let i = 0; i < detalleAnual.length; i++) {
+    const d = detalleAnual[i];
+    
+    const excPrevioTotal = excedenteBase + excedenteProg;
+    d.excedente_previo = parseFloat(excPrevioTotal.toFixed(2));
+    
+    // Sumar excedente a los consumidos directos del periodo
+    let totalConsBase = d.consumidos_base + excedenteBase;
+    let totalConsProg = d.consumidos_prog + excedenteProg;
+    
+    excedenteBase = 0;
+    excedenteProg = 0;
+
+    // Cap at capacities (15 for base, d.progresivos for prog)
+    if (totalConsBase > 15) {
+      excedenteBase = totalConsBase - 15;
+      totalConsBase = 15;
+    }
+    if (totalConsProg > d.progresivos) {
+      excedenteProg = totalConsProg - d.progresivos;
+      totalConsProg = d.progresivos;
+    }
+    
+    d.consumidos_base = parseFloat(totalConsBase.toFixed(2));
+    d.consumidos_prog = parseFloat(totalConsProg.toFixed(2));
+    d.consumidos = parseFloat((totalConsBase + totalConsProg).toFixed(2));
+    
+    d.disponibles_base = parseFloat((d.base - d.consumidos_base).toFixed(2));
+    d.disponibles_prog = parseFloat((d.progresivos - d.consumidos_prog).toFixed(2));
+    d.disponibles = parseFloat((d.disponibles_base + d.disponibles_prog).toFixed(2));
+    
+    d.es_ultimo_periodo = (i === detalleAnual.length - 1);
+  }
+
+  // Generar periodos futuros si aún hay excedente o solicitudes asignadas a años futuros
+  let currentStartYear = detalleAnual.length > 0 ? detalleAnual[detalleAnual.length - 1].startYear + 1 : ingreso.getFullYear();
+  let baseYaAlcanzadaFuturo = baseYaAlcanzada;
+  let anosEnEmpresaFuturo = anosEnEmpresa + 1;
+
+  while (excedenteBase > 0 || excedenteProg > 0 || currentStartYear <= maxYearInSolicitudes) {
+    if (detalleAnual.length > 0) {
+      detalleAnual[detalleAnual.length - 1].es_ultimo_periodo = false;
+    }
+
+    let mesesParaBaseCalculo = 0;
+    if (!tieneBaseDiezAnos) {
+       mesesParaBaseCalculo = Math.max(0, (10 * 12) - mesesTotalExternos);
+    }
+    const mesesPostBaseEnAniversario = Math.max(0, (anosEnEmpresaFuturo * 12) - mesesParaBaseCalculo);
+    const anosPostBaseEnAniversario = Math.floor(mesesPostBaseEnAniversario / 12);
+    const progr = Math.floor(anosPostBaseEnAniversario / 3);
+
+    let esPeriodoBase = false;
+    const mesesTotalesAlFinal = (anosEnEmpresaFuturo * 12) + mesesTotalExternos;
+    if (!baseYaAlcanzadaFuturo && mesesTotalesAlFinal >= 120) {
+      esPeriodoBase = true;
+      baseYaAlcanzadaFuturo = true;
+    }
+
+    const directConsBase = consumidosBasePorPeriodo[currentStartYear] || 0;
+    const directConsProg = consumidosProgPorPeriodo[currentStartYear] || 0;
+
+    let totalConsBase = excedenteBase + directConsBase;
+    let totalConsProg = excedenteProg + directConsProg;
+
+    const excPrevioTotal = excedenteBase + excedenteProg;
+
+    excedenteBase = 0;
+    excedenteProg = 0;
+
+    if (totalConsBase > 15) {
+      excedenteBase = totalConsBase - 15;
+      totalConsBase = 15;
+    }
+    if (totalConsProg > progr) {
+      excedenteProg = totalConsProg - progr;
+      totalConsProg = progr;
+    }
+
+    const consumidos_base = parseFloat(totalConsBase.toFixed(2));
+    const consumidos_prog = parseFloat(totalConsProg.toFixed(2));
+    const consumidos = parseFloat((consumidos_base + consumidos_prog).toFixed(2));
+
+    detalleAnual.push({
+      startYear: currentStartYear,
+      periodo: `${currentStartYear} - ${currentStartYear + 1} (Adelantado)`,
+      base: 0,
+      progresivos: 0, // Aún no ganados en tiempo real
+      total: 0,
+      consumidos: consumidos,
+      consumidos_base: consumidos_base,
+      consumidos_prog: consumidos_prog,
+      disponibles: -consumidos,
+      disponibles_base: -consumidos_base,
+      disponibles_prog: -consumidos_prog,
+      es_periodo_base: esPeriodoBase,
+      excedente_previo: parseFloat(excPrevioTotal.toFixed(2)),
+      es_ultimo_periodo: true
+    });
+
+    currentStartYear++;
+    anosEnEmpresaFuturo++;
   }
 
   const diasLegalesAcumulados = parseFloat((mesesEnEmpresa * 1.25).toFixed(4));
   const diasProgresivosTotal = diasProgresivosAcumulados;
   const diasProgresivosAnuales = progresivosEmpresa;
   const consumido = parseFloat(total_consumido);
-  const saldoActual = Math.floor(diasLegalesAcumulados + diasProgresivosTotal - consumido);
+  const saldoActual = parseFloat((diasLegalesAcumulados + diasProgresivosTotal - consumido).toFixed(2));
 
-  const saldoBaseTotal = Math.max(0, parseFloat((diasLegalesAcumulados - total_consumido_base).toFixed(2)));
-  const saldoProgresivoTotal = Math.max(0, parseFloat((diasProgresivosTotal - total_consumido_prog).toFixed(2)));
+  // Regla 6-8: Permitir saldo negativo – no clampar con Math.max(0, ...)
+  const saldoBaseTotal = parseFloat((diasLegalesAcumulados - total_consumido_base).toFixed(2));
+  const saldoProgresivoTotal = parseFloat((diasProgresivosTotal - total_consumido_prog).toFixed(2));
 
   return {
     diasLegalesAcumulados,
@@ -198,8 +324,8 @@ async function calcularSaldo(empleadoId) {
   };
 }
 
-// Lógica de validaciones para POST /api/solicitudes (6 pasos)
-async function validarYCrearSolicitud(empleado_id, fecha_inicio, fecha_fin, es_progresivo = false, periodo_asignado) {
+// Lógica de validaciones para POST /api/solicitudes (Reglas 6-7-8)
+async function validarYCrearSolicitud(empleado_id, fecha_inicio, fecha_fin, es_progresivo = false, periodo_asignado, forzar = false) {
   if (new Date(fecha_inicio) > new Date(fecha_fin)) {
     throw new Error('Fecha de inicio posterior a fecha de fin');
   }
@@ -221,12 +347,49 @@ async function validarYCrearSolicitud(empleado_id, fecha_inicio, fecha_fin, es_p
   }
 
   if (es_progresivo) {
+    // Regla estricta: no se pueden usar más días progresivos de los que corresponden en el periodo
     if (dias_habiles > periodoInfo.disponibles_prog) {
-      throw new Error(`Los días solicitados (${dias_habiles}) exceden el saldo progresivo disponible del periodo (${periodoInfo.disponibles_prog}).`);
+      const err = new Error(`Los días solicitados (${dias_habiles}) exceden los días progresivos disponibles del periodo (${periodoInfo.disponibles_prog}). No se permite exceder los días progresivos asignados.`);
+      err.code = 'PROG_EXCEEDED';
+      throw err;
     }
   } else {
-    if (dias_habiles > periodoInfo.disponibles_base) {
-      throw new Error(`Los días solicitados (${dias_habiles}) exceden el saldo base disponible del periodo (${periodoInfo.disponibles_base}). Marque la casilla de días progresivos si corresponde.`);
+    const esUltimoPeriodo = periodoInfo.es_ultimo_periodo;
+
+    // Periodos anteriores (no el último): bloqueo estricto
+    if (!esUltimoPeriodo) {
+      if (periodoInfo.disponibles <= 0) {
+        throw new Error('Este periodo ya no tiene días disponibles. Todos los días legales y progresivos fueron consumidos.');
+      }
+      if (dias_habiles > periodoInfo.disponibles_base) {
+        throw new Error(`Los días solicitados (${dias_habiles}) exceden el saldo base disponible del periodo (${periodoInfo.disponibles_base}).`);
+      }
+    } else {
+      // Último periodo: Regla 6 – permitir saldo negativo con advertencia
+      if (dias_habiles > periodoInfo.disponibles_base) {
+        const nuevoSaldo = saldos.saldoActual - dias_habiles;
+
+        // Regla 7: Límite máximo de -15 días negativos
+        if (nuevoSaldo < -15) {
+          const err = new Error(`No se puede procesar. El saldo resultante (${nuevoSaldo}) excedería el límite máximo de -15 días negativos permitidos.`);
+          err.code = 'LIMIT_EXCEEDED';
+          throw err;
+        }
+
+        // Si no se forzó, devolver advertencia para que el frontend pida confirmación
+        if (!forzar) {
+          const err = new Error(`Los días solicitados (${dias_habiles}) exceden el saldo base disponible del periodo (${periodoInfo.disponibles_base}). El saldo actual pasará a ${nuevoSaldo} días.`);
+          err.code = 'SALDO_NEGATIVO';
+          err.detalle = {
+            dias_solicitados: dias_habiles,
+            disponibles_periodo: periodoInfo.disponibles_base,
+            saldo_actual: saldos.saldoActual,
+            saldo_resultante: nuevoSaldo
+          };
+          throw err;
+        }
+        // Si forzar === true, continúa y procesa la solicitud con saldo negativo
+      }
     }
   }
 
@@ -247,9 +410,11 @@ async function crearSolicitudHistorica(empleado_id, year, dias) {
   const dias_habiles = parseFloat(dias); // preserve 0.5-day precision
 
   const saldos = await calcularSaldo(empleado_id);
-  
-  if (dias_habiles > saldos.saldoActual) {
-    throw new Error(`Saldo insuficiente. Días a registrar: ${dias_habiles}, Saldo: ${saldos.saldoActual}`);
+
+  // Regla 7: validar que el saldo no baje de -15
+  const nuevoSaldo = saldos.saldoActual - dias_habiles;
+  if (nuevoSaldo < -15) {
+    throw new Error(`No se puede procesar. El saldo resultante (${nuevoSaldo}) excedería el límite máximo de -15 días negativos permitidos.`);
   }
 
   const base_previo = saldos.saldoBaseTotal - dias_habiles;
