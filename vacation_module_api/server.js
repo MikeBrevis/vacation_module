@@ -12,7 +12,9 @@ const helmet = require('helmet');
 const app = express();
 
 // Seguridad HTTP headers con Helmet
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: false,
+}));
 
 app.use(cors({ origin: '*' }));
 app.use(express.json());
