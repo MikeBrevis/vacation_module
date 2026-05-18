@@ -35,11 +35,31 @@ if (process.env.NODE_ENV === 'production') {
   console.log('⚠️  Seguridad: Helmet activado en modo RELAJADO (Desarrollo)');
 }
 
-app.use(cors({ origin: '*' }));
+// CORS Dinámico: Permitir todo en Desarrollo para no interferir con Live Server de diferentes puertos (5500, 5502, etc.), restringir en Producción
+const allowedOrigin = process.env.NODE_ENV === 'production' ? (process.env.FRONTEND_ORIGIN || '*') : '*';
+app.use(cors({ origin: allowedOrigin }));
 app.use(express.json());
 
-// Servir archivos estáticos del frontend (desde la raíz del proyecto)
-app.use(express.static(path.join(__dirname, '../')));
+// Servir archivos estáticos de forma segura
+if (process.env.NODE_ENV === 'production') {
+  app.use('/assets', express.static(path.join(__dirname, '../assets')));
+  app.use('/img', express.static(path.join(__dirname, '../img')));
+  
+  app.get('/', (req, res) => res.sendFile(path.join(__dirname, '../index.html')));
+  app.get('/index.html', (req, res) => res.sendFile(path.join(__dirname, '../index.html')));
+  app.get('/login.html', (req, res) => res.sendFile(path.join(__dirname, '../login.html')));
+  app.get('/empleado.html', (req, res) => res.sendFile(path.join(__dirname, '../empleado.html')));
+  
+  // Servir logo si existe
+  app.get('/logo.png', (req, res) => {
+    res.sendFile(path.join(__dirname, '../logo.png'));
+  });
+  console.log('🛡️  Estáticos: Modo de producción seguro activado');
+} else {
+  // En desarrollo local, permitir acceso general a la raíz para facilitar live reloading
+  app.use(express.static(path.join(__dirname, '../')));
+  console.log('⚠️  Estáticos: Modo de desarrollo local activo (raíz compartida)');
+}
 
 // Rate limiting para prevenir fuerza bruta en el login
 const authLimiter = rateLimit({
