@@ -11,10 +11,29 @@ const helmet = require('helmet');
 
 const app = express();
 
-// Seguridad HTTP headers con Helmet
-app.use(helmet({
-  crossOriginResourcePolicy: false,
-}));
+// Seguridad HTTP headers con Helmet (Dinámico: Estricto en Prod, Relajado en Dev)
+if (process.env.NODE_ENV === 'production') {
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
+        styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net"],
+        fontSrc: ["'self'", "data:", "https://cdn.jsdelivr.net"],
+        imgSrc: ["'self'", "data:"],
+        connectSrc: ["'self'"] // En producción solo se conecta a su propio origen
+      }
+    }
+  }));
+  console.log('🛡️  Seguridad: Helmet activado en modo ESTRICTO (Producción)');
+} else {
+  app.use(helmet({
+    contentSecurityPolicy: false,      // Desactivado localmente para no interferir con Live Server
+    crossOriginResourcePolicy: false,   // Permite peticiones de origen cruzado en desarrollo
+    crossOriginOpenerPolicy: false
+  }));
+  console.log('⚠️  Seguridad: Helmet activado en modo RELAJADO (Desarrollo)');
+}
 
 app.use(cors({ origin: '*' }));
 app.use(express.json());
