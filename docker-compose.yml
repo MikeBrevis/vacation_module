@@ -9,6 +9,8 @@ services:
       - DB_PASS=secret
       - DB_NAME=vacation_db
       - PORT=3000
+      - JWT_SECRET=${JWT_SECRET}
+      - FERIADOS_API_KEY=${FERIADOS_API_KEY}
     depends_on:
       - db
 
