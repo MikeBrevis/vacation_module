@@ -96,7 +96,7 @@ app.use('/api/solicitudes', verifyToken, require('./routes/solicitudes'));
 app.use('/api/feriados', verifyToken, require('./routes/feriados'));
 
 const PORT = process.env.PORT || 3000;
-if (require.main === module) {
+if (require.main === module || process.env.NODE_ENV !== 'test') {
   app.listen(PORT, () => {
     console.log(`Servidor iniciado en puerto ${PORT}`);
   });
