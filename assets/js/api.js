@@ -1,7 +1,16 @@
-/* const API_URL = 'http://localhost:3000/api';
-const AUTH_URL = 'http://localhost:3000/auth'; */
-const API_URL = '/api';
-const AUTH_URL = '/auth';
+const getBaseUrl = () => {
+  if (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') {
+    // If running on Live Server (port 5500 or similar), point to backend port 3000
+    if (window.location.port !== '3000') {
+      return 'http://127.0.0.1:3000';
+    }
+  }
+  return '';
+};
+
+const BASE_URL = getBaseUrl();
+const API_URL = `${BASE_URL}/api`;
+const AUTH_URL = `${BASE_URL}/auth`;
 
 // Verificación de sesión en páginas protegidas
 if (!window.location.pathname.endsWith('login.html')) {

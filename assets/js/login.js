@@ -9,8 +9,14 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
   const alertBox = document.getElementById('loginAlert');
 
   try {
-    /* const response = await fetch('http://localhost:3000/auth/login', { */
-    const response = await fetch('/auth/login', {
+    const getBaseUrl = () => {
+      if (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') {
+        if (window.location.port !== '3000') return 'http://127.0.0.1:3000';
+      }
+      return '';
+    };
+
+    const response = await fetch(`${getBaseUrl()}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ usuario, contraseña })
