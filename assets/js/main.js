@@ -343,11 +343,35 @@ document.getElementById('modalEditarEmpleado')?.addEventListener('hidden.bs.moda
   if (alerta) alerta.remove();
 });
 
-document.getElementById('btnSincronizar').addEventListener('click', async () => {
-  if (confirm('¿Sincronizar feriados con API?')) {
-    try {
-      const res = await api.sincronizarFeriados();
-      alert(res.mensaje);
-    } catch(err) { alert(err.message); }
+function showToast(message, type = 'success') {
+  const toastEl = document.getElementById('globalToast');
+  if (!toastEl) return;
+  const toastMessage = document.getElementById('toastMessage');
+  
+  // Clean previous colors
+  toastEl.classList.remove('bg-success', 'bg-danger', 'bg-warning', 'bg-info');
+  // Add new color
+  toastEl.classList.add(`bg-${type}`);
+  toastMessage.textContent = message;
+  
+  const toast = new bootstrap.Toast(toastEl, { delay: 3000 });
+  toast.show();
+}
+
+document.getElementById('btnSincronizar').addEventListener('click', async (e) => {
+  const btn = e.currentTarget;
+  const originalHtml = btn.innerHTML;
+  
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Sincronizando...`;
+
+  try {
+    const res = await api.sincronizarFeriados();
+    showToast(res.mensaje || 'Feriados sincronizados correctamente.', 'success');
+  } catch(err) { 
+    showToast(err.message || 'Error al sincronizar los feriados.', 'danger'); 
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = originalHtml;
   }
 });

@@ -83,34 +83,245 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (datos.saldo.detalleAnual) renderDetalleAnual(datos.saldo.detalleAnual);
     renderHistorial(datos.solicitudes);
 
-    // Cargar feriados e inicializar Flatpickr
+    // Cargar feriados
     const feriados = await api.getFeriados();
     const fechasFeriados = feriados.map(f => f.fecha.split('T')[0]); // Formato YYYY-MM-DD
 
-    const flatpickrConfig = {
-      locale: 'es',
-      dateFormat: 'Y-m-d',
-      disable: [
-        function (date) { return (date.getDay() === 0 || date.getDay() === 6); } // Deshabilitar fines de semana
-      ],
-      onDayCreate: function (dObj, dStr, fp, dayElem) {
-        // Obtenemos la fecha en formato YYYY-MM-DD de forma segura ajustando la zona horaria local
-        const year = dayElem.dateObj.getFullYear();
-        const month = String(dayElem.dateObj.getMonth() + 1).padStart(2, '0');
-        const day = String(dayElem.dateObj.getDate()).padStart(2, '0');
-        const dateStr = `${year}-${month}-${day}`;
+    // ═══ Premium Double Calendar Selector Logic ═══
+    let selectedStartDate = null;
+    let selectedEndDate = null;
+    let calendarMonth = new Date().getMonth(); // 0-11
+    let calendarYear = new Date().getFullYear();
+    const calendarModal = new bootstrap.Modal(document.getElementById('modalCalendarioDoble'));
 
-        if (fechasFeriados.includes(dateStr)) {
-          dayElem.classList.add('feriado');
-          // También podemos añadir un tooltip con el nombre del feriado si lo buscamos
-          const feriadoObj = feriados.find(f => f.fecha.split('T')[0] === dateStr);
-          if (feriadoObj) dayElem.title = feriadoObj.descripcion;
+    const monthNames = [
+      'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+      'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+    ];
+
+    // Triggers for opening the modal
+    document.getElementById('fechaInicio').addEventListener('click', abrirCalendario);
+    document.getElementById('fechaFin').addEventListener('click', abrirCalendario);
+
+    function abrirCalendario() {
+      const valInicio = document.getElementById('fechaInicio').value;
+      const valFin = document.getElementById('fechaFin').value;
+
+      if (valInicio) {
+        selectedStartDate = new Date(valInicio + 'T00:00:00');
+      } else {
+        selectedStartDate = null;
+      }
+
+      if (valFin) {
+        selectedEndDate = new Date(valFin + 'T00:00:00');
+      } else {
+        selectedEndDate = null;
+      }
+
+      // Al abrir el calendario, siempre posicionarlo mostrando el mes actual de hoy
+      const hoy = new Date();
+      calendarMonth = hoy.getMonth();
+      calendarYear = hoy.getFullYear();
+
+      renderDualCalendar();
+      updateFooterSummary();
+      calendarModal.show();
+    }
+
+    // Navigation Controls
+    document.getElementById('btnPrevMonth').addEventListener('click', (e) => {
+      e.stopPropagation();
+      calendarMonth--;
+      if (calendarMonth < 0) {
+        calendarMonth = 11;
+        calendarYear--;
+      }
+      renderDualCalendar();
+    });
+
+    document.getElementById('btnNextMonth').addEventListener('click', (e) => {
+      e.stopPropagation();
+      calendarMonth++;
+      if (calendarMonth > 11) {
+        calendarMonth = 0;
+        calendarYear++;
+      }
+      renderDualCalendar();
+    });
+
+    // Formatting Helpers
+    function toISODateString(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function formatDisplayDate(date) {
+      if (!date) return '';
+      return `${date.getDate()} de ${monthNames[date.getMonth()]}`;
+    }
+
+    function renderDualCalendar() {
+      // Month 1
+      const m1 = calendarMonth;
+      const y1 = calendarYear;
+
+      // Month 2
+      let m2 = calendarMonth + 1;
+      let y2 = calendarYear;
+      if (m2 > 11) {
+        m2 = 0;
+        y2 = calendarYear + 1;
+      }
+
+      renderMonth(m1, y1, 'monthTitle1', 'monthDays1');
+      renderMonth(m2, y2, 'monthTitle2', 'monthDays2');
+    }
+
+    function renderMonth(month, year, titleId, daysGridId) {
+      document.getElementById(titleId).textContent = `${monthNames[month]} de ${year}`;
+      
+      const grid = document.getElementById(daysGridId);
+      grid.innerHTML = '';
+
+      const totalDays = new Date(year, month + 1, 0).getDate();
+      const firstDayIndex = (new Date(year, month, 1).getDay() + 6) % 7; // Lunes=0 ... Domingo=6
+
+      // Empty padding cells
+      for (let i = 0; i < firstDayIndex; i++) {
+        const emptyCell = document.createElement('div');
+        emptyCell.className = 'calendar-day-box empty';
+        grid.appendChild(emptyCell);
+      }
+
+      for (let d = 1; d <= totalDays; d++) {
+        const curDate = new Date(year, month, d);
+        const curStr = toISODateString(curDate);
+        const dow = curDate.getDay(); // 0=Domingo, 6=Sábado
+        const isWeekend = (dow === 0 || dow === 6);
+        const isFeriado = fechasFeriados.includes(curStr);
+
+        const cell = document.createElement('div');
+        cell.className = 'calendar-day-box';
+        cell.textContent = d;
+        cell.dataset.date = curStr;
+
+        if (isWeekend) {
+          cell.classList.add('weekend', 'disabled');
+        } else if (isFeriado) {
+          cell.classList.add('feriado', 'disabled');
+          const feriadoObj = feriados.find(f => f.fecha.split('T')[0] === curStr);
+          if (feriadoObj) {
+            cell.title = feriadoObj.descripcion;
+          }
+        }
+
+        // Selected highlights
+        if (selectedStartDate && curStr === toISODateString(selectedStartDate)) {
+          cell.classList.add('selected-start');
+        }
+        if (selectedEndDate && curStr === toISODateString(selectedEndDate)) {
+          cell.classList.add('selected-end');
+        }
+        if (selectedStartDate && selectedEndDate && curDate > selectedStartDate && curDate < selectedEndDate && !isWeekend && !isFeriado) {
+          cell.classList.add('in-range');
+        }
+
+        // Active triggers
+        if (!isWeekend && !isFeriado) {
+          cell.addEventListener('click', () => handleDayClick(curDate));
+          cell.addEventListener('mouseenter', () => handleDayMouseEnter(curDate));
+        }
+
+        grid.appendChild(cell);
+      }
+    }
+
+    function handleDayClick(date) {
+      if (!selectedStartDate || (selectedStartDate && selectedEndDate)) {
+        selectedStartDate = date;
+        selectedEndDate = null;
+      } else if (selectedStartDate && !selectedEndDate) {
+        if (date < selectedStartDate) {
+          selectedStartDate = date;
+        } else {
+          selectedEndDate = date;
         }
       }
-    };
+      renderDualCalendar();
+      updateFooterSummary();
+    }
 
-    const fpInicio = flatpickr('#fechaInicio', flatpickrConfig);
-    const fpFin = flatpickr('#fechaFin', flatpickrConfig);
+    function handleDayMouseEnter(hoveredDate) {
+      if (selectedStartDate && !selectedEndDate) {
+        const allCells = document.querySelectorAll('.calendar-days-grid .calendar-day-box[data-date]');
+        allCells.forEach(cell => {
+          const cellDate = new Date(cell.dataset.date + 'T00:00:00');
+          
+          cell.classList.remove('in-range', 'selected-end');
+
+          if (cellDate > selectedStartDate && cellDate < hoveredDate && !cell.classList.contains('disabled')) {
+            cell.classList.add('in-range');
+          } else if (toISODateString(cellDate) === toISODateString(hoveredDate)) {
+            cell.classList.add('selected-end');
+          }
+        });
+
+        if (hoveredDate >= selectedStartDate) {
+          const daysCount = calcularDiasHabiles(selectedStartDate, hoveredDate);
+          document.getElementById('selectionDaysSummary').textContent = `${daysCount} ${daysCount === 1 ? 'día hábil' : 'días hábiles'}`;
+          document.getElementById('selectionDatesSummary').textContent = `${formatDisplayDate(selectedStartDate)} - ${formatDisplayDate(hoveredDate)}`;
+        }
+      }
+    }
+
+    function updateFooterSummary() {
+      const summaryDays = document.getElementById('selectionDaysSummary');
+      const summaryDates = document.getElementById('selectionDatesSummary');
+      const btnAplicar = document.getElementById('btnAplicarFechas');
+
+      if (selectedStartDate && selectedEndDate) {
+        const daysCount = calcularDiasHabiles(selectedStartDate, selectedEndDate);
+        summaryDays.textContent = `${daysCount} ${daysCount === 1 ? 'día hábil' : 'días hábiles'}`;
+        summaryDates.textContent = `${formatDisplayDate(selectedStartDate)} - ${formatDisplayDate(selectedEndDate)}`;
+        btnAplicar.removeAttribute('disabled');
+      } else if (selectedStartDate) {
+        summaryDays.textContent = 'Selecciona fecha de término';
+        summaryDates.textContent = `Inicio: ${formatDisplayDate(selectedStartDate)}`;
+        btnAplicar.setAttribute('disabled', 'true');
+      } else {
+        summaryDays.textContent = 'Selecciona tus fechas';
+        summaryDates.textContent = 'Haz clic en el día de inicio';
+        btnAplicar.setAttribute('disabled', 'true');
+      }
+    }
+
+    // Apply Dates Selection
+    document.getElementById('btnAplicarFechas').addEventListener('click', () => {
+      if (selectedStartDate && selectedEndDate) {
+        document.getElementById('fechaInicio').value = toISODateString(selectedStartDate);
+        document.getElementById('fechaFin').value = toISODateString(selectedEndDate);
+        
+        actualizarDiasSeleccionados();
+        calendarModal.hide();
+      }
+    });
+
+    function calcularDiasHabiles(start, end) {
+      let count = 0;
+      let cur = new Date(start);
+      while (cur <= end) {
+        const dow = cur.getDay();
+        const iso = toISODateString(cur);
+        if (dow !== 0 && dow !== 6 && !fechasFeriados.includes(iso)) {
+          count++;
+        }
+        cur.setDate(cur.getDate() + 1);
+      }
+      return count;
+    }
 
     function actualizarDiasSeleccionados() {
       const startStr = document.getElementById('fechaInicio').value;
@@ -123,48 +334,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
 
-      const start = new Date(startStr + 'T00:00:00');
-      const end = new Date(endStr + 'T00:00:00');
-
-      if (start > end) {
-        box.classList.add('d-none');
-        return;
-      }
-
-      let count = 0;
-      const cur = new Date(start);
-      while (cur <= end) {
-        const dow = cur.getDay();
-        const iso = cur.toISOString().split('T')[0];
-        if (dow !== 0 && dow !== 6 && !fechasFeriados.includes(iso)) {
-          count++;
-        }
-        cur.setDate(cur.getDate() + 1);
-      }
-
+      const count = calcularDiasHabiles(new Date(startStr + 'T00:00:00'), new Date(endStr + 'T00:00:00'));
       val.textContent = count;
       box.classList.remove('d-none');
     }
 
-    fpInicio.config.onChange.push((selectedDates, dateStr, instance) => {
-      if (selectedDates.length > 0) {
-        fpFin.set('minDate', selectedDates[0]);
-        fpFin.jumpToDate(selectedDates[0]);
-        actualizarDiasSeleccionados();
-      }
-    });
-
-    fpFin.config.onChange.push(() => {
-      actualizarDiasSeleccionados();
-    });
-
+    // Selector de Periodos handler
     document.getElementById('solPeriodo').addEventListener('change', e => {
       const startYear = e.target.value;
       if (startYear) {
-        // Posicionar el calendario en el mes de ingreso de ese año
-        const jumpDate = new Date(parseInt(startYear), ingreso.getMonth(), 1);
-        fpInicio.jumpToDate(jumpDate);
-        fpFin.jumpToDate(jumpDate);
+        calendarYear = parseInt(startYear);
+        calendarMonth = ingreso.getMonth(); // Mes de ingreso del empleado
+        
+        // Reset selections to avoid inconsistent states
+        selectedStartDate = null;
+        selectedEndDate = null;
+        document.getElementById('fechaInicio').value = '';
+        document.getElementById('fechaFin').value = '';
+        actualizarDiasSeleccionados();
       }
     });
 
